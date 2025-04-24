@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "mosaic-publish": "./dist/publish/src/cli.js"
+    "mosaic-publish": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
@@ -13,9 +13,14 @@
     "test": "npm run build && vitest run"
   },
   "dependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-virtual": "^3.0.2",
-    "@rollup/plugin-commonjs": "^28.0.3",
+    "@uwdata/mosaic-core": "https://gitpkg.vercel.app/uwdata/mosaic/packages/core?ron/mosaic-publish&scripts.postinstall=npm run build",
+    "@uwdata/mosaic-spec": "https://gitpkg.vercel.app/uwdata/mosaic/packages/spec?ron/mosaic-publish&scripts.postinstall=npm run build",
+    "@uwdata/mosaic-sql": "https://gitpkg.vercel.app/uwdata/mosaic/packages/sql?ron/mosaic-publish&scripts.postinstall=npm run build",
+    "@uwdata/mosaic-duckdb": "https://gitpkg.vercel.app/uwdata/mosaic/packages/duckdb?ron/mosaic-publish",
+    "@uwdata/vgplot": "https://gitpkg.vercel.app/uwdata/mosaic/packages/vgplot?ron/mosaic-publish",
     "chalk": "^4.1.2",
     "rollup": "^4.35.0",
     "skia-canvas": "^2.0.2",
@@ -24,7 +29,10 @@
   "devDependencies": {
     "@types/jsdom": "^21.1.7",
     "@types/yargs": "^17.0.33",
-    "typescript": "^5.6.3"
+    "jsdom": "^26.0.0",
+    "typescript": "^5.6.3",
+    "vitest": "^3.0.9",
+    "yaml": "^2.7.0"
   },
   "files": [
     "dist"

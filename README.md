@@ -2,6 +2,9 @@
 
 A CLI tool and API for compiling and optimizing specifications. The tool processes spec files, handles dataset optimizations, and provides a configurable way to manage different compile and optimization tasks.
 
+> Until the PR on base `mosaic` repo merges, `npm install` pulls `@uwdata/*` straight from
+> the `mosaic-publish` branch of the Mosaic repo using [`gitpkg`](https://github.com/EqualMa/gitpkg).
+
 ## CLI Installation
 
 This tool is designed to be used via `npx` or can be installed globally.

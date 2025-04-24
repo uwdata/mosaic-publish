@@ -1,7 +1,9 @@
 import { Coordinator, decodeIPC } from "@uwdata/mosaic-core";
+// @ts-ignore -- no types
 import { DuckDB } from "@uwdata/mosaic-duckdb";
 import { InstantiateContext } from "@uwdata/mosaic-spec";
-import { createAPIContext } from "../../../vgplot/src/index.js";
+// @ts-ignore -- no types
+import { createAPIContext } from "@uwdata/vgplot";
 
 const SCAN_OP = 'SEQ_SCAN ';
 
