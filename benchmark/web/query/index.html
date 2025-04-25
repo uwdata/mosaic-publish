@@ -43,7 +43,7 @@
     clear();
     if (name !== 'none') {
       console.log(`LOADING ${name}.js`);
-      const benchmarks = (await import(`../specs/javascript/${name}.js`)).default;
+      const benchmarks = (await import(`../specs/experiments/${name}.js`)).default;
       await benchmarks(view);
     }
   }

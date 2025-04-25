@@ -1,68 +1,56 @@
 meta:
-  title: Airline Performance
-  description: |
-    Arrival delay statistics for major US airlines.
-    Use the slider to filter by departure time and adjust the confidence level.
-    The error bars show 95% confidence intervals for mean arrival delay.
-
-    _You may need to wait a few seconds for the dataset to load._
+  title: Cross-Filter Flights
 data:
-  airlines:
-    file: data/flights.parquet
-    select:
-      - airline
-      - delay
-      - time
-    where: airline != 'KS' AND airline != '9K'
+  flights10m: SELECT
+    GREATEST(-60, LEAST(ARR_DELAY, 180))::DOUBLE AS delay,
+    DISTANCE AS distance,
+    DEP_TIME AS time
+    FROM 'https://idl.uw.edu/mosaic-datasets/data/flights-10m.parquet'
 params:
-  filter: { select: single }
-  ci: { value: 0.95 }
+  brush: { select: crossfilter }
 vconcat:
-- hconcat:
-  - input: slider
-    select: interval
-    field: time
-    as: $filter
-    min: 6
-    max: 24
-    step: 0.1
-    value: 24
-    label: Depart By
-  - input: slider
-    as: $ci
-    min: 0.5
-    max: 0.999
-    step: 0.001
-    label: Conf. Level
 - plot:
-  - mark: tickX
-    data: [{ x: 0 }]
-    stroke: '#ccc'
-    strokeDasharray: '3 3'
-  - mark: errorbarX
-    data: { from: airlines, filterBy: $filter }
-    ci: $ci
-    x: delay
-    y: airline
-    strokeWidth: 1
-    marker: tick
-    sort: { y: '-x' }
-  - mark: text
-    data: { from: airlines, filterBy: $filter }
-    frameAnchor: right
-    fontSize: 8
-    fill: '#999'
-    dx: 50
-    text: { count: }
-    y: airline
-  xDomain: [-15, 15]
-  xLabel: Arrival Delay (minutes)
-  xLabelAnchor: center
-  yDomain: Fixed
-  yGrid: true
-  yLabel: null
-  marginTop: 5
-  marginLeft: 83
-  marginRight: 52
-  width: 565
-  height: 400 
+  - mark: rectY
+    data: { from: flights10m, filterBy: $brush }
+    x: { bin: delay }
+    y: { count: }
+    fill: steelblue
+    insetLeft: 0.5
+    insetRight: 0.5
+  - select: intervalX
+    as: $brush
+  xDomain: Fixed
+  xLabel: Arrival Delay (min)
+  yTickFormat: s
+  width: 600
+  height: 200
+- plot:
+  - mark: rectY
+    data: { from: flights10m, filterBy: $brush }
+    x: { bin: time }
+    y: { count: }
+    fill: steelblue
+    insetLeft: 0.5
+    insetRight: 0.5
+  - select: intervalX
+    as: $brush
+  xDomain: Fixed
+  xLabel: Departure Time (hour)
+  yTickFormat: s
+  width: 600
+  height: 200
+- plot:
+  - mark: rectY
+    data: { from: flights10m, filterBy: $brush }
+    x: { bin: distance }
+    y: { count: }
+    fill: steelblue
+    insetLeft: 0.5
+    insetRight: 0.5
+  - select: intervalX
+    as: $brush
+  xDomain: Fixed
+  xLabel: Flight Distance (miles)
+  yTickFormat: s
+  width: 600
+  height: 200

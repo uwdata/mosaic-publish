@@ -2,7 +2,7 @@ meta:
   title: Airline Performance
 data:
   airlines:
-    file: https://idl.uw.edu/mosaic-datasets/data/flights.parquet
+    file: ./data/flights.parquet
     select:
       - airline
       - delay
@@ -13,21 +13,21 @@ params:
   ci: { value: 0.95 }
 vconcat:
 - hconcat:
-  - slider:
-      select: interval
-      field: time
-      as: $filter
-      min: 6
-      max: 24
-      step: 0.1
-      value: 24
-      label: Depart By
-  - slider:
-      as: $ci
-      min: 0.5
-      max: 0.999
-      step: 0.001
-      label: Conf. Level
+  - input: slider
+    select: interval
+    field: time
+    as: $filter
+    min: 6
+    max: 24
+    step: 0.1
+    value: 24
+    label: Depart By
+  - input: slider
+    as: $ci
+    min: 0.5
+    max: 0.999
+    step: 0.001
+    label: Conf. Level
 - plot:
   - mark: tickX
     data: [{ x: 0 }]
@@ -53,37 +53,6 @@ vconcat:
   xLabel: Arrival Delay (minutes)
   xLabelAnchor: center
   yDomain: Fixed
-  yTickFormat: |
-    {
-      'KS': 'Peninsula',
-      'AX': 'Trans States',
-      '9K': 'Cape Air',
-      'C5': 'CommuteAir',
-      'EV': 'ExpressJet',
-      'YV': 'Mesa',
-      'ZW': 'Air Wisconsin',
-      'F9': 'Frontier',
-      'OO': 'SkyWest',
-      'AA': 'American',
-      'MQ': 'Envoy',
-      'NK': 'Spirit',
-      'HA': 'Hawaiian',
-      'G7': 'GoJet',
-      'QX': 'Horizon',
-      'CP': 'Alis Cargo',
-      'G4': 'Allegiant',
-      'EM': 'Empire',
-      'OH': 'PSA',
-      '9E': 'Endeavor',
-      'AS': 'Alaska',
-      'B6': 'JetBlue',
-      'UA': 'United',
-      'DL': 'Delta',
-      'VX': 'Virgin America',
-      'PT': 'Piedmont',
-      'YX': 'Republic',
-      'WN': 'Southwest'
-    }
   yGrid: true
   yLabel: null
   marginTop: 5
