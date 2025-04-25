@@ -1,0 +1,156 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 2rem;
+  color: #333;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #dee2e6;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.nav-item {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #2c3e50;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.nav-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.nav-item h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.nav-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  text-decoration: none;
+  background-color: #dee2e6;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+header {
+  margin-bottom: 0.5em;
+}
+
+label {
+  margin-right: 0.5em;
+  font-size: 14px;
+}
+
+label.value {
+  margin-left: 0.25em;
+  display: inline-block;
+  width: 25px;
+}
+
+.concat-horizontal {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.plot {
+  display: flex;
+}
+
+.input {
+  margin-right: 1em;
+}
+
+.input > * {
+  vertical-align: middle;
+}
+
+table {
+  position: relative;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+  max-width: initial;
+  min-height: 33px;
+  margin: 0;
+  width: 100%;
+
+  font-size: 13px;
+  line-height: 15.6px;
+}
+
+thead tr th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  cursor: ns-resize;
+  border-bottom: solid 1px #ccc;
+}
+
+tbody tr:hover {
+  background: #eef;
+}
+
+th {
+  color: #111;
+  text-align: left;
+  vertical-align: bottom;
+}
+
+td, th {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 3px 6.5px 3px 0;
+}
+
+tbody tr:first-child td {
+  padding-top: 4px;
+}
+
+td, tr:not(:last-child) th {
+  border-bottom: solid 1px #eee;
+}
+
+td {
+  color: #444;
+  vertical-align: top;
+}

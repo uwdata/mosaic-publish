@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "name": "mosaic-selection-benchmarks",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "bench": "node bin/bench.js"
+  },
+  "dependencies": {
+    "arquero": "^7.1.0"
+  }
+}

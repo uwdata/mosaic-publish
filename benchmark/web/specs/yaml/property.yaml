@@ -1,0 +1,44 @@
+meta:
+  title: Property Prices
+data:
+  property:
+    file: data/property.parquet
+params:
+  brush: { select: intersect }
+plot:
+  - mark: raster
+    data: { from: property }
+    x: date
+    y: price
+    fill: density
+    bandwidth: 0
+    pixelSize: 2
+    imageRendering: pixelated
+  - select: intervalX
+    as: $brush
+    brush:
+      fillOpacity: 0
+      stroke: white
+      strokeDasharray: '2,2'
+  - mark: regressionY
+    data: { from: property }
+    x: date
+    y: price
+    stroke: white
+    strokeWidth: 1
+    strokeDasharray: '4,4'
+  - mark: regressionY
+    data: { from: property, filterBy: $brush }
+    x: date
+    y: price
+    stroke: white
+    ci: 0.95
+colorScheme: turbo
+xDomain: [1995, 2025]
+yDomain: [0, 1000000]
+xTickFormat: d
+yTickFormat: s
+xLabel: Date
+yLabel: Property Price (£)
+width: 500
+height: 400 
