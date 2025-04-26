@@ -40,13 +40,24 @@ export class PublishError extends Error {
   }
 }
 
+export type MosaicPublisherOptions = {
+  spec: string;
+  outputPath?: string;
+  title?: string;
+  optimize?: 'none' | 'minimal' | 'more' | 'most';
+  logger?: Logger;
+  customScript?: string;
+};
+
 /**
  * Class to facilitate publishing a Mosaic specification.
- * @param spec Contents of JSON Mosaic specification file.
- * @param outputPath Path to the desired output directory.
- * @param title Optional title for the HTML file.
- * @param optimize Level of optimization for published visualization.
- * @param logger Optional logger instance to use for logging.
+ * @param options Options for configuring the MosaicPublisher instance.
+ * @param options.spec Contents of JSON Mosaic specification file.
+ * @param options.outputPath Path to the desired output directory.
+ * @param options.title Optional title for the HTML file.
+ * @param options.optimize Level of optimization for published visualization.
+ * @param options.logger Optional logger instance to use for logging.
+ * @param options.customScript Optional custom script to include in the output.
  * 
  * The `publish` method is the main entry point for the class
  */
@@ -56,24 +67,27 @@ export class MosaicPublisher {
   private title: string;
   private optimizations: Optimizations[];
   private logger: Logger;
+  private customScript: string = '';
 
   // Internal references used throughout
   private ctx: PublishContext;
   private ast?: SpecNode;
   private data?: Record<string, DataNode>;
 
-  constructor(
-    spec: string,
+  constructor({
+    spec,
     outputPath = 'out',
     title = 'Mosaic Visualization',
-    optimize: 'none' | 'minimal' | 'more' | 'most' = 'minimal',
-    logger: Logger = new Logger(LogLevel.INFO)
-  ) {
+    optimize = 'minimal',
+    logger = new Logger(LogLevel.INFO),
+    customScript = '',
+  }: MosaicPublisherOptions) {
     this.spec = spec;
     this.outputPath = outputPath;
     this.title = title;
     this.optimizations = OPTIMIZATION_LEVEL_TO_OPTIMIZATIONS[optimize];
     this.logger = logger;
+    this.customScript = customScript;
 
     // Create PublishContext
     const connector = publishConnector();
@@ -255,7 +269,8 @@ export class MosaicPublisher {
       css: templateCSS,
       isInteractive,
       needsClientReady: this.optimizations.includes(Optimizations.PRERENDER),
-      element
+      element,
+      customScript: this.customScript,
     });
 
     fs.writeFileSync(path.join(this.outputPath, 'index.html'), html);

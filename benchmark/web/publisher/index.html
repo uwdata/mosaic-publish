@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Publisher Benchmarks</title>
+  <link href="../styles.css" rel="stylesheet">
+</head>
+<body>
+  <a href="../" class="back-link">Back to Navigation</a>
+  <header style="margin-bottom: 1em;">
+    <span style="margin-right: 0.5em;">
+      Specification:
+      <select id="spec">
+        <option value="none"></option>
+        <option value="airlines">Airlines</option>
+        <option value="flights">Flights</option>
+        <option value="gaia">Gaia</option>
+        <option value="property">U.K. Property</option>
+        <option value="taxis">NYC Taxi Trips</option>
+      </select>
+    </span>
+
+    <span style="margin-right: 0.5em;">
+      Optimization Level:
+      <select id="optimization">
+        <option value="none" selected>None</option>
+        <option value="minimal">Minimal</option>
+        <option value="more">More</option>
+        <option value="most">Most</option>
+      </select>
+    </span>
+
+    <span style="margin-right: 0.5em;">
+      <button id="run" style="margin-right: 0.5em;">Run</button>
+      <button id="stop">Stop</button>
+    </span>
+
+    <span style="margin-right: 0.5em;">
+      <button id="runAll">Run All</button>
+      <button id="downloadResults">Download Results</button>
+    </span>
+  </header>
+  
+  <div class="results-container">
+    <div class="results-header">
+      <h2>Benchmark Results</h2>
+      <table id="results-table" class="results-table">
+        <thead>
+          <tr>
+            <th>Specification</th>
+            <th>Optimization</th>
+            <th>Publish Time (ms)</th>
+            <th>Network Time (ms)</th>
+            <th>Time to Render (ms)</th>
+            <th>Activation Time (ms)</th>
+          </tr>
+        </thead>
+        <tbody id="results-body">
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div id="visualization-container" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; min-height: 200px;">
+    <h3>Visualization Preview</h3>
+    <div id="preview"></div>
+  </div>
+  
+  <script type="module" src="./publisher.js"></script>
+</body>
+</html>

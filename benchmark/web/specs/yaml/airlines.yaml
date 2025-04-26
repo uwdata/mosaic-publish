@@ -4,9 +4,7 @@ data:
   airlines:
     file: ./data/flights.parquet
     select:
-      - airline
-      - delay
-      - time
+      - '*'
     where: airline != 'KS' AND airline != '9K'
 params:
   filter: { select: single }

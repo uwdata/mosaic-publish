@@ -2,6 +2,7 @@ export type HTMLTemplateOptions = {
   title: string;
   isInteractive: boolean;
   needsClientReady: boolean;
+  customScript?: string;
   element?: HTMLElement | SVGElement;
   css?: string;
 };
@@ -28,6 +29,11 @@ ${options.needsClientReady ?
       `  import {default as visualization} from './index.js';
 
   document.querySelector('.mosaic')?.replaceChildren(visualization);`}
+</script>` : ''}
+
+${options.customScript ? `
+<script type="module">
+${options.customScript}
 </script>` : ''}
 ${options.css}
 </html>`;
@@ -190,10 +196,11 @@ vg.coordinator().manager.cache().import(tableFromIPC(cacheBytes).get(0).cache);`
 
 export type PreambleOptions = { needsClientReady: boolean, cacheFile?: string };
 export const preamble = (options: PreambleOptions) => {
-  if (!options.needsClientReady && !options.cacheFile) {
-    return undefined
-  }
   return `
+export function getVgInstance() {
+  return vg;
+}
+
 ${options.needsClientReady ? clientsReady : ''}
 ${options.cacheFile ? loadCache(options.cacheFile) : ''}
 `
@@ -210,6 +217,6 @@ export enum Optimizations {
 export const OPTIMIZATION_LEVEL_TO_OPTIMIZATIONS = {
   none: [],
   minimal: [Optimizations.PROJECTION, Optimizations.DATASHAKE],
-  more: [Optimizations.PROJECTION, Optimizations.DATASHAKE, Optimizations.PREAGREGATE],
+  more: [Optimizations.PROJECTION, Optimizations.DATASHAKE, Optimizations.PREAGREGATE, Optimizations.LOAD_CACHE],
   most: [Optimizations.PROJECTION, Optimizations.DATASHAKE, Optimizations.PREAGREGATE, Optimizations.LOAD_CACHE, Optimizations.PRERENDER],
 };
