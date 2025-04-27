@@ -185,7 +185,7 @@ export class MosaicPublisher {
    * for queries to finish.
    */
   private async activateInteractorsAndInputs(interactors: Set<any>, inputs: Set<MosaicClient>) {
-    await this.ctx.coordinator.exec('CREATE SCHEMA IF NOT EXISTS mosaic');
+    // await this.ctx.coordinator.exec('CREATE SCHEMA IF NOT EXISTS mosaic');
     for (const interactor of interactors) {
       if (isActivatable(interactor)) interactor.activate();
       await this.waitForQueryToFinish();

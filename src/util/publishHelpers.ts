@@ -6,6 +6,7 @@ import { InstantiateContext } from "@uwdata/mosaic-spec";
 import { createAPIContext } from "@uwdata/vgplot";
 
 const SCAN_OP = 'SEQ_SCAN ';
+const NO_EXPLAIN = ['CREATE', 'INSTALL', 'LOAD']
 
 export function publishConnector() {
   const db = new DuckDB();
@@ -43,19 +44,21 @@ export function publishConnector() {
         }
       };
       // run an explain query and extract the result
-      const explain = await db.query(`EXPLAIN (FORMAT json) ${query.sql}`);
-      if (explain.length !== 0 && explain[0].explain_value) {
-        const plan = JSON.parse(explain[0].explain_value);
-        plan.some(findSeqScan);
+      if (!NO_EXPLAIN.some(cmd => query.sql.startsWith(cmd))) {
+        const explain = await db.query(`EXPLAIN (FORMAT json) ${query.sql}`);
+        if (explain.length !== 0 && explain[0].explain_value) {
+          const plan = JSON.parse(explain[0].explain_value);
+          plan.some(findSeqScan);
 
-        for (const table in toCheck) {
-          const desc = await db.query(`DESCRIBE ${table}`);
-          const columns = desc.map((col: any) => col.column_name);
-          const filters = Array.from(toCheck[table]).join(' ');
-          for (const col of columns) {
-            if (filters.includes(col)) {
-              if (!(table in tables)) tables[table] = new Set();
-              tables[table].add(col);
+          for (const table in toCheck) {
+            const desc = await db.query(`DESCRIBE ${table}`);
+            const columns = desc.map((col: any) => col.column_name);
+            const filters = Array.from(toCheck[table]).join(' ');
+            for (const col of columns) {
+              if (filters.includes(col)) {
+                if (!(table in tables)) tables[table] = new Set();
+                tables[table].add(col);
+              }
             }
           }
         }
