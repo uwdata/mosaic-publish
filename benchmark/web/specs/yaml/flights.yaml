@@ -1,11 +1,14 @@
 meta:
   title: Cross-Filter Flights
 data:
-  flights10m: SELECT
-    GREATEST(-60, LEAST(ARR_DELAY, 180))::DOUBLE AS delay,
-    DISTANCE AS distance,
-    DEP_TIME AS time
+  flights10m: |
+    SELECT
+      GREATEST(-60, LEAST(ARR_DELAY, 180))::DOUBLE AS delay,
+      DISTANCE AS distance,
+      DEP_TIME AS time
     FROM 'https://idl.uw.edu/mosaic-datasets/data/flights-10m.parquet'
+    LIMIT 1E7
+  # USING SAMPLE 1E7 ROWS;
 params:
   brush: { select: crossfilter }
 vconcat:

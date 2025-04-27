@@ -39,5 +39,5 @@ _For review purposes, this step can also be skipped. Benchmark results are in th
 
 ### Analyze Results
 
-- Upon completion of benchmarks, run the `prep/results.sql` script in DuckDB to consolidate all benchmark results. _You can safely skip this step if reviewing, `results/results.parquet` should already exist._
+- Upon completion of benchmarks, run the `prep/select/results.sql` script in DuckDB to consolidate all benchmark results. _You can safely skip this step if reviewing, `results/results.parquet` should already exist._
 - Run `npm run dev` and browse to `http://localhost:5173/web/results/` to see result visualization.

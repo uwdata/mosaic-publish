@@ -19,14 +19,23 @@ async function loadYAMLSpec(specName) {
   }
 }
 
-// Run a benchmark for a specific specification and optimization level
-async function runBenchmark(specName, optimization, updateUI = true) {
+// Utility to update LIMIT/limit in YAML
+function updateSpecLimit(yaml, newLimit) {
+  return yaml
+    .replace(/USING SAMPLE\s+\d+(e\d+)?\s+ROWS/gi, `USING SAMPLE ${newLimit} ROWS`)
+    .replace(/LIMIT\s+\d+(e\d+)?/gi, `LIMIT ${newLimit}`)
+}
+
+// Run a benchmark for a specific specification, optimization level, and data size
+async function runBenchmark(specName, optimization, dataSize, updateUI = true) {
   if (specName === 'none') return;
   
   // Load the YAML specification
-  const spec = await loadYAMLSpec(specName);
+  let spec = await loadYAMLSpec(specName);
   if (!spec) return;
   
+  // Update LIMIT/limit in the YAML
+  spec = updateSpecLimit(spec, dataSize);
   // Create results table row
   let resultRow;
   if (updateUI) {
@@ -35,6 +44,8 @@ async function runBenchmark(specName, optimization, updateUI = true) {
     resultRow.innerHTML = `
       <td>${specName}</td>
       <td>${optimization}</td>
+      <td>${dataSize}</td>
+      <td>Measuring...</td>
       <td>Measuring...</td>
       <td>Measuring...</td>
       <td>Measuring...</td>
@@ -46,7 +57,7 @@ async function runBenchmark(specName, optimization, updateUI = true) {
   try {
     // Clear preview area
     const previewEl = document.getElementById('preview');
-    previewEl.innerHTML = `<div class="loading">Running benchmark for ${specName} with ${optimization} optimization...</div>`;
+    previewEl.innerHTML = `<div class="loading">Running benchmark for ${specName} with ${optimization} optimization, data size ${dataSize}...</div>`;
     
     // Call the server endpoint to handle publishing and timing
     const response = await fetch('http://localhost:3001/publish', {
@@ -57,7 +68,8 @@ async function runBenchmark(specName, optimization, updateUI = true) {
       body: JSON.stringify({
         spec,
         specName,
-        optimization
+        optimization,
+        dataSize
       })
     });
     
@@ -74,9 +86,11 @@ async function runBenchmark(specName, optimization, updateUI = true) {
     const benchmarkResult = {
       spec: specName,
       optimization,
+      dataSize,
       publishTime: result.timing.publishTime,
       networkTime: result.timing.networkTime,
       loadTime: result.timing.loadTime,
+      hydrationTime: result.timing.hydrationTime,
       activationTime: result.timing.activationTime,
     };
     
@@ -88,9 +102,11 @@ async function runBenchmark(specName, optimization, updateUI = true) {
       resultRow.innerHTML = `
         <td>${specName}</td>
         <td>${optimization}</td>
+        <td>${dataSize}</td>
         <td>${Math.round(result.timing.publishTime)}</td>
         <td>${Math.round(result.timing.networkTime)}</td>
         <td>${Math.round(result.timing.loadTime)}</td>
+        <td>${Math.round(result.timing.hydrationTime)}</td>
         <td>${Math.round(result.timing.activationTime)}</td>
       `;
     }
@@ -98,7 +114,7 @@ async function runBenchmark(specName, optimization, updateUI = true) {
     // Update preview with the visualization
     previewEl.innerHTML = `
       <div style="padding: 20px; background: #f5f5f5; border: 1px solid #ddd;">
-        <h3>${specName} Visualization (${optimization} optimization)</h3>
+        <h3>${specName} Visualization (${optimization} optimization, data size ${dataSize})</h3>
         <div class="visualization" style="margin: 20px 0;">
           <img src="${result.screenshot}" alt="Visualization" style="max-width: 100%; border: 1px solid #ccc;">
         </div>
@@ -112,25 +128,29 @@ async function runBenchmark(specName, optimization, updateUI = true) {
       resultRow.innerHTML = `
         <td>${specName}</td>
         <td>${optimization}</td>
-        <td colspan="3" class="error">Error: ${error.message}</td>
+        <td>${dataSize}</td>
+        <td colspan="4" class="error">Error: ${error.message}</td>
       `;
     }
     return null;
   }
 }
 
-// Function to run all benchmarks
+// Function to run all benchmarks (all specs, all optimizations, all data sizes)
 async function runAllBenchmarks() {
   const specs = ['airlines', 'flights', 'gaia', 'property', 'taxis'];
   const optimizations = ['none', 'minimal', 'more', 'most'];
+  const dataSizes = ['1E4', '1E5', '1E6', '1E7'];
   
   for (const spec of specs) {
     for (const opt of optimizations) {
-      if (abort) {
-        abort = false;
-        return;
+      for (const dataSize of dataSizes) {
+        if (abort) {
+          abort = false;
+          return;
+        }
+        await runBenchmark(spec, opt, dataSize);
       }
-      await runBenchmark(spec, opt);
     }
   }
 }
@@ -157,11 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const downloadResultsButton = document.getElementById('downloadResults');
   const specSelector = document.getElementById('spec');
   const optimizationSelector = document.getElementById('optimization');
+  const dataSizeSelector = document.getElementById('data-size');
   
   runButton.addEventListener('click', () => {
     const specName = specSelector.value;
     const optimization = optimizationSelector.value;
-    runBenchmark(specName, optimization);
+    const dataSize = dataSizeSelector.value;
+    runBenchmark(specName, optimization, dataSize);
   });
   
   stopButton.addEventListener('click', stop);

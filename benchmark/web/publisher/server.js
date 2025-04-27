@@ -88,6 +88,7 @@ app.post('/publish', async (req, res) => {
             const rect = plot.getBoundingClientRect();
             return rect.width > 0 && rect.height > 0;
           })) {
+            performance.mark('hydration-start');
             resolve();
           } else {
             setTimeout(checkPlots, 5);
@@ -113,6 +114,13 @@ app.post('/publish', async (req, res) => {
         checkActivation();
       });
     });
+
+    const hydrationTime = await page.evaluate(() => {
+      const marks = performance.getEntriesByType('mark');
+      const hydrationStart = marks.find(m => m.name === 'hydration-start')?.startTime;
+      const hydrationEnd = marks.find(m => m.name === 'activate-start')?.startTime;
+      return Math.max(hydrationEnd - hydrationStart, 0); // Negative means no hydration necessary
+    });
     
     await page.tracing.stop();
     const screenshot = await page.screenshot({ encoding: 'base64' });
@@ -125,7 +133,8 @@ app.post('/publish', async (req, res) => {
         publishTime, 
         networkTime,
         loadTime, 
-        activationTime
+        activationTime,
+        hydrationTime
       },
       screenshot: `data:image/png;base64,${screenshot}`
     });

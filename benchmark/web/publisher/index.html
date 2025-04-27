@@ -30,6 +30,16 @@
     </span>
 
     <span style="margin-right: 0.5em;">
+      Data Size:
+      <select id="data-size">
+        <option value="1E4">1E4</option>
+        <option value="1E5">1E5</option>
+        <option value="1E6">1E6</option>
+        <option value="1E7" selected>1E7</option>
+      </select>
+    </span>
+
+    <span style="margin-right: 0.5em;">
       <button id="run" style="margin-right: 0.5em;">Run</button>
       <button id="stop">Stop</button>
     </span>
@@ -48,10 +58,12 @@
           <tr>
             <th>Specification</th>
             <th>Optimization</th>
-            <th>Publish Time (ms)</th>
-            <th>Network Time (ms)</th>
-            <th>Time to Render (ms)</th>
-            <th>Activation Time (ms)</th>
+            <th>Data Size</th>
+            <th>Publish (ms)</th>
+            <th>Network (ms)</th>
+            <th>Render (ms)</th>
+            <th>Hydrate (ms)</th>
+            <th>Activate (ms)</th>
           </tr>
         </thead>
         <tbody id="results-body">

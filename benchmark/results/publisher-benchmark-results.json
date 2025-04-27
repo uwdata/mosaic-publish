@@ -1,0 +1,802 @@
+[
+  {
+    "spec": "airlines",
+    "optimization": "none",
+    "dataSize": "1E4",
+    "publishTime": 2398.7812080000003,
+    "networkTime": 640.5012079999997,
+    "loadTime": 614.305875,
+    "hydrationTime": 0,
+    "activationTime": 17.90000057220459
+  },
+  {
+    "spec": "airlines",
+    "optimization": "none",
+    "dataSize": "1E5",
+    "publishTime": 2068.5352920000005,
+    "networkTime": 620.502792000003,
+    "loadTime": 261.20154099999854,
+    "hydrationTime": 0,
+    "activationTime": 27.699999809265137
+  },
+  {
+    "spec": "airlines",
+    "optimization": "none",
+    "dataSize": "1E6",
+    "publishTime": 2121.5496249999997,
+    "networkTime": 605.4795840000006,
+    "loadTime": 422.0473749999983,
+    "hydrationTime": 0,
+    "activationTime": 87.70000076293945
+  },
+  {
+    "spec": "airlines",
+    "optimization": "none",
+    "dataSize": "1E7",
+    "publishTime": 3298.699041,
+    "networkTime": 695.2025829999984,
+    "loadTime": 2070.153000000002,
+    "hydrationTime": 0,
+    "activationTime": 691.6000003814697
+  },
+  {
+    "spec": "airlines",
+    "optimization": "minimal",
+    "dataSize": "1E4",
+    "publishTime": 2007.6757089999992,
+    "networkTime": 615.2052919999987,
+    "loadTime": 247.06033299999763,
+    "hydrationTime": 0,
+    "activationTime": 18.200000762939453
+  },
+  {
+    "spec": "airlines",
+    "optimization": "minimal",
+    "dataSize": "1E5",
+    "publishTime": 1961.163499999995,
+    "networkTime": 602.2700410000034,
+    "loadTime": 260.32991700000275,
+    "hydrationTime": 0,
+    "activationTime": 23.59999942779541
+  },
+  {
+    "spec": "airlines",
+    "optimization": "minimal",
+    "dataSize": "1E6",
+    "publishTime": 2148.512625000003,
+    "networkTime": 610.1489170000059,
+    "loadTime": 431.9595829999962,
+    "hydrationTime": 0,
+    "activationTime": 88.89999961853027
+  },
+  {
+    "spec": "airlines",
+    "optimization": "minimal",
+    "dataSize": "1E7",
+    "publishTime": 3145.1539579999953,
+    "networkTime": 629.6905840000036,
+    "loadTime": 2240.6935840000006,
+    "hydrationTime": 0,
+    "activationTime": 687.3000001907349
+  },
+  {
+    "spec": "airlines",
+    "optimization": "more",
+    "dataSize": "1E4",
+    "publishTime": 2138.1085840000014,
+    "networkTime": 649.5095409999994,
+    "loadTime": 264.7702500000014,
+    "hydrationTime": 0,
+    "activationTime": 18.699999809265137
+  },
+  {
+    "spec": "airlines",
+    "optimization": "more",
+    "dataSize": "1E5",
+    "publishTime": 2001.4000420000011,
+    "networkTime": 636.0720419999998,
+    "loadTime": 281.49795900000026,
+    "hydrationTime": 0,
+    "activationTime": 19.399999618530273
+  },
+  {
+    "spec": "airlines",
+    "optimization": "more",
+    "dataSize": "1E6",
+    "publishTime": 2060.322,
+    "networkTime": 632.0749169999981,
+    "loadTime": 390.19854200000555,
+    "hydrationTime": 0,
+    "activationTime": 14
+  },
+  {
+    "spec": "airlines",
+    "optimization": "more",
+    "dataSize": "1E7",
+    "publishTime": 3127.446499999998,
+    "networkTime": 646.3466250000056,
+    "loadTime": 1547.7959169999958,
+    "hydrationTime": 0,
+    "activationTime": 19.59999942779541
+  },
+  {
+    "spec": "airlines",
+    "optimization": "most",
+    "dataSize": "1E4",
+    "publishTime": 1915.0990840000013,
+    "networkTime": 632.7344169999997,
+    "loadTime": 0.866042000001471,
+    "hydrationTime": 253.80000019073486,
+    "activationTime": 16.899999618530273
+  },
+  {
+    "spec": "airlines",
+    "optimization": "most",
+    "dataSize": "1E5",
+    "publishTime": 2015.6366659999985,
+    "networkTime": 652.6386250000069,
+    "loadTime": 0.9072920000035083,
+    "hydrationTime": 246.69999980926514,
+    "activationTime": 17.100000381469727
+  },
+  {
+    "spec": "airlines",
+    "optimization": "most",
+    "dataSize": "1E6",
+    "publishTime": 2045.764750000002,
+    "networkTime": 636.9786249999888,
+    "loadTime": 1.0831670000043232,
+    "hydrationTime": 444.0999994277954,
+    "activationTime": 19.800000190734863
+  },
+  {
+    "spec": "airlines",
+    "optimization": "most",
+    "dataSize": "1E7",
+    "publishTime": 3087.4807500000024,
+    "networkTime": 652.8969169999909,
+    "loadTime": 1.0127079999947455,
+    "hydrationTime": 1713.5,
+    "activationTime": 21.800000190734863
+  },
+  {
+    "spec": "flights",
+    "optimization": "none",
+    "dataSize": "1E4",
+    "publishTime": 4140.486833000003,
+    "networkTime": 609.0745829999942,
+    "loadTime": 313.9863750000077,
+    "hydrationTime": 0,
+    "activationTime": 29.5
+  },
+  {
+    "spec": "flights",
+    "optimization": "none",
+    "dataSize": "1E5",
+    "publishTime": 4026.456791999997,
+    "networkTime": 658.3562499999971,
+    "loadTime": 329.06999999999243,
+    "hydrationTime": 0,
+    "activationTime": 35.40000057220459
+  },
+  {
+    "spec": "flights",
+    "optimization": "none",
+    "dataSize": "1E6",
+    "publishTime": 3652.9197080000013,
+    "networkTime": 608.3203749999957,
+    "loadTime": 429.4832080000051,
+    "hydrationTime": 0,
+    "activationTime": 160
+  },
+  {
+    "spec": "flights",
+    "optimization": "none",
+    "dataSize": "1E7",
+    "publishTime": 4743.372707999995,
+    "networkTime": 626.1270419999928,
+    "loadTime": 2019.374125000002,
+    "hydrationTime": 0,
+    "activationTime": 1353.5
+  },
+  {
+    "spec": "flights",
+    "optimization": "minimal",
+    "dataSize": "1E4",
+    "publishTime": 3582.6270839999925,
+    "networkTime": 614.5846250000031,
+    "loadTime": 273.525667000009,
+    "hydrationTime": 0,
+    "activationTime": 23.800000190734863
+  },
+  {
+    "spec": "flights",
+    "optimization": "minimal",
+    "dataSize": "1E5",
+    "publishTime": 3561.9895829999878,
+    "networkTime": 611.5508749999863,
+    "loadTime": 288.16854100000637,
+    "hydrationTime": 0,
+    "activationTime": 36
+  },
+  {
+    "spec": "flights",
+    "optimization": "minimal",
+    "dataSize": "1E6",
+    "publishTime": 3592.484958999994,
+    "networkTime": 609.4148339999956,
+    "loadTime": 425.1337499999936,
+    "hydrationTime": 0,
+    "activationTime": 158.70000076293945
+  },
+  {
+    "spec": "flights",
+    "optimization": "minimal",
+    "dataSize": "1E7",
+    "publishTime": 4799.209999999992,
+    "networkTime": 632.0297080000018,
+    "loadTime": 1963.7309590000077,
+    "hydrationTime": 0,
+    "activationTime": 1360.1000003814697
+  },
+  {
+    "spec": "flights",
+    "optimization": "more",
+    "dataSize": "1E4",
+    "publishTime": 3581.808165999988,
+    "networkTime": 642.5546660000109,
+    "loadTime": 308.87304200000654,
+    "hydrationTime": 0,
+    "activationTime": 22.40000057220459
+  },
+  {
+    "spec": "flights",
+    "optimization": "more",
+    "dataSize": "1E5",
+    "publishTime": 3791.165875000006,
+    "networkTime": 616.3408749999944,
+    "loadTime": 383.3067089999968,
+    "hydrationTime": 0,
+    "activationTime": 22.5
+  },
+  {
+    "spec": "flights",
+    "optimization": "more",
+    "dataSize": "1E6",
+    "publishTime": 3669.640875000012,
+    "networkTime": 646.0906660000037,
+    "loadTime": 621.7141670000274,
+    "hydrationTime": 0,
+    "activationTime": 27.5
+  },
+  {
+    "spec": "flights",
+    "optimization": "more",
+    "dataSize": "1E7",
+    "publishTime": 5259.279374999984,
+    "networkTime": 686.4623330000031,
+    "loadTime": 2211.5651249999937,
+    "hydrationTime": 0,
+    "activationTime": 27.199999809265137
+  },
+  {
+    "spec": "flights",
+    "optimization": "most",
+    "dataSize": "1E4",
+    "publishTime": 3593.105125000002,
+    "networkTime": 660.8470420000085,
+    "loadTime": 0.970499999995809,
+    "hydrationTime": 266.30000019073486,
+    "activationTime": 21.5
+  },
+  {
+    "spec": "flights",
+    "optimization": "most",
+    "dataSize": "1E5",
+    "publishTime": 3650.041292000009,
+    "networkTime": 669.7957919999899,
+    "loadTime": 1.4385829999810085,
+    "hydrationTime": 339.19999980926514,
+    "activationTime": 22.199999809265137
+  },
+  {
+    "spec": "flights",
+    "optimization": "most",
+    "dataSize": "1E6",
+    "publishTime": 3781.55137500001,
+    "networkTime": 650.4373340000166,
+    "loadTime": 0.9797919999982696,
+    "hydrationTime": 459.6000003814697,
+    "activationTime": 23.300000190734863
+  },
+  {
+    "spec": "flights",
+    "optimization": "most",
+    "dataSize": "1E7",
+    "publishTime": 4892.954625000013,
+    "networkTime": 657.2121670000197,
+    "loadTime": 0.9167500000039581,
+    "hydrationTime": 1546.9000005722046,
+    "activationTime": 23.199999809265137
+  },
+  {
+    "spec": "gaia",
+    "optimization": "none",
+    "dataSize": "1E4",
+    "publishTime": 2389.3285000000033,
+    "networkTime": 617.8092919999908,
+    "loadTime": 300.7034580000036,
+    "hydrationTime": 0,
+    "activationTime": 48.09999942779541
+  },
+  {
+    "spec": "gaia",
+    "optimization": "none",
+    "dataSize": "1E5",
+    "publishTime": 2350.0952079999843,
+    "networkTime": 611.4603329999954,
+    "loadTime": 323.79074999998556,
+    "hydrationTime": 0,
+    "activationTime": 111.70000076293945
+  },
+  {
+    "spec": "gaia",
+    "optimization": "none",
+    "dataSize": "1E6",
+    "publishTime": 2713.6150419999904,
+    "networkTime": 631.2515410000051,
+    "loadTime": 508.23958299998776,
+    "hydrationTime": 0,
+    "activationTime": 498.6000003814697
+  },
+  {
+    "spec": "gaia",
+    "optimization": "none",
+    "dataSize": "1E7",
+    "publishTime": 4882.5067500000005,
+    "networkTime": 625.5637920000008,
+    "loadTime": 2283.453332999983,
+    "hydrationTime": 0,
+    "activationTime": 4440.799999237061
+  },
+  {
+    "spec": "gaia",
+    "optimization": "minimal",
+    "dataSize": "1E4",
+    "publishTime": 2329.5597089999937,
+    "networkTime": 608.7444590000086,
+    "loadTime": 297.11066700000083,
+    "hydrationTime": 0,
+    "activationTime": 45.19999980926514
+  },
+  {
+    "spec": "gaia",
+    "optimization": "minimal",
+    "dataSize": "1E5",
+    "publishTime": 2326.8024159999914,
+    "networkTime": 619.9147090000042,
+    "loadTime": 326.15629199999967,
+    "hydrationTime": 0,
+    "activationTime": 84.5
+  },
+  {
+    "spec": "gaia",
+    "optimization": "minimal",
+    "dataSize": "1E6",
+    "publishTime": 2577.181083000003,
+    "networkTime": 650.4231659999932,
+    "loadTime": 488.606375000003,
+    "hydrationTime": 0,
+    "activationTime": 525.3000001907349
+  },
+  {
+    "spec": "gaia",
+    "optimization": "minimal",
+    "dataSize": "1E7",
+    "publishTime": 4798.735625000001,
+    "networkTime": 606.926999999996,
+    "loadTime": 2307.871125000005,
+    "hydrationTime": 0,
+    "activationTime": 4574.300000190735
+  },
+  {
+    "spec": "gaia",
+    "optimization": "more",
+    "dataSize": "1E4",
+    "publishTime": 2525.9065830000036,
+    "networkTime": 642.3320829999866,
+    "loadTime": 398.26625000001513,
+    "hydrationTime": 0,
+    "activationTime": 42.5
+  },
+  {
+    "spec": "gaia",
+    "optimization": "more",
+    "dataSize": "1E5",
+    "publishTime": 2865.712790999998,
+    "networkTime": 642.849750000023,
+    "loadTime": 427.5739579999936,
+    "hydrationTime": 0,
+    "activationTime": 32.89999961853027
+  },
+  {
+    "spec": "gaia",
+    "optimization": "more",
+    "dataSize": "1E6",
+    "publishTime": 2719.190708000009,
+    "networkTime": 638.0345420000085,
+    "loadTime": 679.9421250000014,
+    "hydrationTime": 0,
+    "activationTime": 38.10000038146973
+  },
+  {
+    "spec": "gaia",
+    "optimization": "more",
+    "dataSize": "1E7",
+    "publishTime": 5343.786791999999,
+    "networkTime": 830.2072090000147,
+    "loadTime": 3026.276332999987,
+    "hydrationTime": 0,
+    "activationTime": 39.5
+  },
+  {
+    "spec": "gaia",
+    "optimization": "most",
+    "dataSize": "1E4",
+    "publishTime": 2486.214707999985,
+    "networkTime": 659.7291249999835,
+    "loadTime": 1.0012089999800082,
+    "hydrationTime": 335.80000019073486,
+    "activationTime": 37
+  },
+  {
+    "spec": "gaia",
+    "optimization": "most",
+    "dataSize": "1E5",
+    "publishTime": 2436.9427089999954,
+    "networkTime": 656.589707999985,
+    "loadTime": 0.9337080000259448,
+    "hydrationTime": 415.6000003814697,
+    "activationTime": 30.299999237060547
+  },
+  {
+    "spec": "gaia",
+    "optimization": "most",
+    "dataSize": "1E6",
+    "publishTime": 2576.726917000022,
+    "networkTime": 638.2105829999782,
+    "loadTime": 0.8992500000167638,
+    "hydrationTime": 665.6999998092651,
+    "activationTime": 31.600000381469727
+  },
+  {
+    "spec": "gaia",
+    "optimization": "most",
+    "dataSize": "1E7",
+    "publishTime": 5252.763459000009,
+    "networkTime": 642.8991669999959,
+    "loadTime": 0.9790420000208542,
+    "hydrationTime": 3032,
+    "activationTime": 31.600000381469727
+  },
+  {
+    "spec": "property",
+    "optimization": "none",
+    "dataSize": "1E4",
+    "publishTime": 2156.6143339999835,
+    "networkTime": 612.673208000022,
+    "loadTime": 300.85062500002095,
+    "hydrationTime": 0,
+    "activationTime": 28.100000381469727
+  },
+  {
+    "spec": "property",
+    "optimization": "none",
+    "dataSize": "1E5",
+    "publishTime": 2156.261832999997,
+    "networkTime": 621.5623749999795,
+    "loadTime": 315.801083999977,
+    "hydrationTime": 0,
+    "activationTime": 36.40000057220459
+  },
+  {
+    "spec": "property",
+    "optimization": "none",
+    "dataSize": "1E6",
+    "publishTime": 2096.1324160000077,
+    "networkTime": 608.5845829999889,
+    "loadTime": 523.8777080000145,
+    "hydrationTime": 0,
+    "activationTime": 111.69999980926514
+  },
+  {
+    "spec": "property",
+    "optimization": "none",
+    "dataSize": "1E7",
+    "publishTime": 2749.9451250000275,
+    "networkTime": 613.1232079999754,
+    "loadTime": 1652.9099999999744,
+    "hydrationTime": 0,
+    "activationTime": 808.8000001907349
+  },
+  {
+    "spec": "property",
+    "optimization": "minimal",
+    "dataSize": "1E4",
+    "publishTime": 1932.7216670000344,
+    "networkTime": 602.4827919999952,
+    "loadTime": 318.3717910000123,
+    "hydrationTime": 0,
+    "activationTime": 26
+  },
+  {
+    "spec": "property",
+    "optimization": "minimal",
+    "dataSize": "1E5",
+    "publishTime": 1984.8972080000094,
+    "networkTime": 612.2654589999584,
+    "loadTime": 308.72333300003083,
+    "hydrationTime": 0,
+    "activationTime": 34.5
+  },
+  {
+    "spec": "property",
+    "optimization": "minimal",
+    "dataSize": "1E6",
+    "publishTime": 2058.0951249999925,
+    "networkTime": 610.7497079999885,
+    "loadTime": 427.45637500000885,
+    "hydrationTime": 0,
+    "activationTime": 108.10000038146973
+  },
+  {
+    "spec": "property",
+    "optimization": "minimal",
+    "dataSize": "1E7",
+    "publishTime": 2702.226459000027,
+    "networkTime": 609.1187499999651,
+    "loadTime": 1651.9852090000059,
+    "hydrationTime": 0,
+    "activationTime": 804.5
+  },
+  {
+    "spec": "property",
+    "optimization": "more",
+    "dataSize": "1E4",
+    "publishTime": 1930.0897499999846,
+    "networkTime": 641.2540000000154,
+    "loadTime": 289.2402080000029,
+    "hydrationTime": 0,
+    "activationTime": 25.200000762939453
+  },
+  {
+    "spec": "property",
+    "optimization": "more",
+    "dataSize": "1E5",
+    "publishTime": 1943.8530420000316,
+    "networkTime": 656.8146249999991,
+    "loadTime": 268.8454999999958,
+    "hydrationTime": 0,
+    "activationTime": 24.5
+  },
+  {
+    "spec": "property",
+    "optimization": "more",
+    "dataSize": "1E6",
+    "publishTime": 2086.6929579999996,
+    "networkTime": 663.6961250000168,
+    "loadTime": 380.50774999998976,
+    "hydrationTime": 0,
+    "activationTime": 24.699999809265137
+  },
+  {
+    "spec": "property",
+    "optimization": "more",
+    "dataSize": "1E7",
+    "publishTime": 2720.377207999991,
+    "networkTime": 633.6207500000019,
+    "loadTime": 1083.5262080000248,
+    "hydrationTime": 0,
+    "activationTime": 85.60000038146973
+  },
+  {
+    "spec": "property",
+    "optimization": "most",
+    "dataSize": "1E4",
+    "publishTime": 1995.5837080000201,
+    "networkTime": 637.5202909999643,
+    "loadTime": 0.8901250000344589,
+    "hydrationTime": 286.1000003814697,
+    "activationTime": 26.59999942779541
+  },
+  {
+    "spec": "property",
+    "optimization": "most",
+    "dataSize": "1E5",
+    "publishTime": 2016.2857920000097,
+    "networkTime": 639.4300829999847,
+    "loadTime": 0.9357080000336282,
+    "hydrationTime": 291,
+    "activationTime": 25.899999618530273
+  },
+  {
+    "spec": "property",
+    "optimization": "most",
+    "dataSize": "1E6",
+    "publishTime": 2060.410542000027,
+    "networkTime": 636.1654580000322,
+    "loadTime": 0.8341250000521541,
+    "hydrationTime": 378.3999996185303,
+    "activationTime": 26
+  },
+  {
+    "spec": "property",
+    "optimization": "most",
+    "dataSize": "1E7",
+    "publishTime": 2792.7413749999832,
+    "networkTime": 644.0129590000142,
+    "loadTime": 0.89429199998267,
+    "hydrationTime": 1110.5,
+    "activationTime": 81.89999961853027
+  },
+  {
+    "spec": "taxis",
+    "optimization": "none",
+    "dataSize": "1E4",
+    "publishTime": 2316.4623330000322,
+    "networkTime": 617.8279169999878,
+    "loadTime": 1444.502959000005,
+    "hydrationTime": 0,
+    "activationTime": 35.30000019073486
+  },
+  {
+    "spec": "taxis",
+    "optimization": "none",
+    "dataSize": "1E5",
+    "publishTime": 2371.0431249999674,
+    "networkTime": 631.9131660000421,
+    "loadTime": 905.4657909999951,
+    "hydrationTime": 0,
+    "activationTime": 55.59999942779541
+  },
+  {
+    "spec": "taxis",
+    "optimization": "none",
+    "dataSize": "1E6",
+    "publishTime": 3032.8859999999986,
+    "networkTime": 612.2997090000426,
+    "loadTime": 1074.4844169999706,
+    "hydrationTime": 0,
+    "activationTime": 390.30000019073486
+  },
+  {
+    "spec": "taxis",
+    "optimization": "none",
+    "dataSize": "1E7",
+    "publishTime": 11166.651000000013,
+    "networkTime": 681.1751659999718,
+    "loadTime": 2998.4453750000102,
+    "hydrationTime": 0,
+    "activationTime": 4447.10000038147
+  },
+  {
+    "spec": "taxis",
+    "optimization": "minimal",
+    "dataSize": "1E4",
+    "publishTime": 2602.4341669999994,
+    "networkTime": 618.1425000000163,
+    "loadTime": 814.429833000002,
+    "hydrationTime": 0,
+    "activationTime": 23.199999809265137
+  },
+  {
+    "spec": "taxis",
+    "optimization": "minimal",
+    "dataSize": "1E5",
+    "publishTime": 2486.9401669999934,
+    "networkTime": 599.9119160000118,
+    "loadTime": 840.0832079999964,
+    "hydrationTime": 0,
+    "activationTime": 50
+  },
+  {
+    "spec": "taxis",
+    "optimization": "minimal",
+    "dataSize": "1E6",
+    "publishTime": 3010.508333000005,
+    "networkTime": 610.6267919999664,
+    "loadTime": 978.7346249999828,
+    "hydrationTime": 0,
+    "activationTime": 438.5
+  },
+  {
+    "spec": "taxis",
+    "optimization": "minimal",
+    "dataSize": "1E7",
+    "publishTime": 10734.082209000015,
+    "networkTime": 656.9718329999596,
+    "loadTime": 3168.5742080000346,
+    "hydrationTime": 0,
+    "activationTime": 4391.400000572205
+  },
+  {
+    "spec": "taxis",
+    "optimization": "more",
+    "dataSize": "1E4",
+    "publishTime": 2613.4039160000393,
+    "networkTime": 632.8200419999775,
+    "loadTime": 838.8967909999774,
+    "hydrationTime": 0,
+    "activationTime": 27.199999809265137
+  },
+  {
+    "spec": "taxis",
+    "optimization": "more",
+    "dataSize": "1E5",
+    "publishTime": 2466.722833000007,
+    "networkTime": 639.6327089999686,
+    "loadTime": 900.0683749999735,
+    "hydrationTime": 0,
+    "activationTime": 28.100000381469727
+  },
+  {
+    "spec": "taxis",
+    "optimization": "more",
+    "dataSize": "1E6",
+    "publishTime": 3162.5117080000346,
+    "networkTime": 637.5205829999759,
+    "loadTime": 1429.6453749999637,
+    "hydrationTime": 0,
+    "activationTime": 23.700000762939453
+  },
+  {
+    "spec": "taxis",
+    "optimization": "more",
+    "dataSize": "1E7",
+    "publishTime": 12933.968958000012,
+    "networkTime": 626.1455000000424,
+    "loadTime": 6138.190166999993,
+    "hydrationTime": 0,
+    "activationTime": 27
+  },
+  {
+    "spec": "taxis",
+    "optimization": "most",
+    "dataSize": "1E4",
+    "publishTime": 2615.6306249999907,
+    "networkTime": 658.9034580000443,
+    "loadTime": 1.048791999986861,
+    "hydrationTime": 868.1999998092651,
+    "activationTime": 23.199999809265137
+  },
+  {
+    "spec": "taxis",
+    "optimization": "most",
+    "dataSize": "1E5",
+    "publishTime": 2699.359416000021,
+    "networkTime": 773.4366670000018,
+    "loadTime": 0.9698329999810085,
+    "hydrationTime": 1012.4000005722046,
+    "activationTime": 28
+  },
+  {
+    "spec": "taxis",
+    "optimization": "most",
+    "dataSize": "1E6",
+    "publishTime": 3481.350999999966,
+    "networkTime": 673.1622079999652,
+    "loadTime": 1.1413329999777488,
+    "hydrationTime": 1725.3999996185303,
+    "activationTime": 35.60000038146973
+  },
+  {
+    "spec": "taxis",
+    "optimization": "most",
+    "dataSize": "1E7",
+    "publishTime": 14063.368666999973,
+    "networkTime": 684.4867499999818,
+    "loadTime": 1.1036670000175945,
+    "hydrationTime": 6534.800000190735,
+    "activationTime": 25.399999618530273
+  }
+]

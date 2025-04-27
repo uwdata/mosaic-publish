@@ -1,8 +1,9 @@
 meta:
   title: Property Prices
 data:
-  property:
-    file: data/property.parquet
+  property: |
+    SELECT * FROM './data/property.parquet' LIMIT 1E7
+  # USING SAMPLE 1E7 ROWS;
 params:
   brush: { select: intersect }
 plot:

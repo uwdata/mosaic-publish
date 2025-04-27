@@ -1,11 +1,15 @@
 meta:
   title: Airline Performance
 data:
-  airlines:
-    file: ./data/flights.parquet
-    select:
-      - '*'
-    where: airline != 'KS' AND airline != '9K'
+  airlines: |
+    SELECT
+      airline,
+      delay,
+      time
+    FROM './data/flights.parquet'
+    WHERE airline != 'KS' AND airline != '9K'
+    LIMIT 1E7
+  # USING SAMPLE 1E7 ROWS;
 params:
   filter: { select: single }
   ci: { value: 0.95 }
