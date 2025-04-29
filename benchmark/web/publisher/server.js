@@ -19,9 +19,29 @@ const TRACE_CATEGORIES = [
   'disabled-by-default-devtools.timeline.frame',
   'loading'      
 ];
+const TIMEOUT = 20000;
 
 const app = express();
 let browser;
+
+// Function to calculate directory size recursively
+function getDirectorySize(dirPath) {
+  let totalSize = 0;
+  const files = fs.readdirSync(dirPath);
+
+  for (const file of files) {
+    const filePath = path.join(dirPath, file);
+    const stats = fs.statSync(filePath);
+
+    if (stats.isFile()) {
+      totalSize += stats.size;
+    } else if (stats.isDirectory()) {
+      totalSize += getDirectorySize(filePath);
+    }
+  }
+
+  return totalSize;
+}
 
 /* CORS */
 app.use((req, res, next) => {
@@ -43,100 +63,104 @@ app.use(
 app.use(express.json());
 app.post('/publish', async (req, res) => {
   const { spec, specName, optimization } = req.body;
+  const NUM_RUNS = 5;
+  const results = [];
 
   try {
-    const t0 = performance.now();
-    await new MosaicPublisher({
-      spec,
-      outputPath: OUTPUT_DIR,
-      title: `${specName}-${optimization} Benchmark`,
-      optimize: optimization,
-      customScript: fs.readFileSync(
-        path.join(__dirname, 'activation-script.js'),
-        'utf8'
-      ),
-    }).publish();
-    const publishTime = performance.now() - t0;
-
     if (!browser) {
       browser = await puppeteer.launch({
         headless: true,
         defaultViewport: { width: 1280, height: 800 }
       });
     }
-    const page = await browser.newPage();
-    const tracePath = path.join(TRACE_DIR, `${specName}-${optimization}-trace.json`);
 
-    await page.tracing.start({
-      path: tracePath,
-      screenshots: true,
-      categories: TRACE_CATEGORIES
-    });
+    // Run the benchmark NUM_RUNS times
+    for (let run = 0; run < NUM_RUNS; run++) {
+      const t0 = performance.now();
+      await new MosaicPublisher({
+        spec,
+        outputPath: OUTPUT_DIR,
+        title: `${specName}-${optimization} Benchmark`,
+        optimize: optimization,
+        customScript: fs.readFileSync(
+          path.join(__dirname, 'activation-script.js'),
+          'utf8'
+        ),
+      }).publish();
+      const publishTime = performance.now() - t0;
 
-    const url = `http://localhost:${PORT}/index.html`;
-    
-    const networkStartTime = performance.now();
-    await page.goto(url, { waitUntil: 'networkidle2' });
-    const networkTime = performance.now() - networkStartTime;
-    
-    const loadStartTime = performance.now();
-    await page.evaluate(() => {
-      return new Promise((resolve) => {
-        const checkPlots = () => {
-          const plots = document.querySelectorAll('.plot');
-          if (plots.length > 0 && Array.from(plots).every(plot => {
-            const rect = plot.getBoundingClientRect();
-            return rect.width > 0 && rect.height > 0;
-          })) {
-            performance.mark('hydration-start');
-            resolve();
-          } else {
-            setTimeout(checkPlots, 5);
-          }
-        };
-        checkPlots();
+      // Calculate package size after publishing
+      const packageSize = getDirectorySize(OUTPUT_DIR);
+
+      const page = await browser.newPage();
+      const tracePath = path.join(TRACE_DIR, `${specName}-${optimization}-run${run + 1}-trace.json`);
+
+      await page.tracing.start({
+        path: tracePath,
+        screenshots: true,
+        categories: TRACE_CATEGORIES,
       });
-    });
-    const loadTime = performance.now() - loadStartTime;
 
-    const activationTime = await page.evaluate(() => {
-      return new Promise((resolve) => {
-        const checkActivation = () => {
-          const marks = performance.getEntriesByType('mark');
-          const activateStart = marks.find(m => m.name === 'activate-start')?.startTime;
-          const activateEnd = marks.find(m => m.name === 'activate-end')?.startTime;
-          if (activateStart && activateEnd) {
-            resolve(activateEnd - activateStart);
-          } else {
-            setTimeout(checkActivation, 5);
-          }
-        };
-        checkActivation();
+      const url = `http://localhost:${PORT}/index.html`;
+      
+      const networkStartTime = performance.now();
+      await page.goto(url, { waitUntil: 'networkidle2' });
+      const networkTime = performance.now() - networkStartTime;
+      
+      const loadStartTime = performance.now();
+      await page.waitForSelector('.plot', { timeout: TIMEOUT });
+      const loadTime = performance.now() - loadStartTime;
+
+      await page.evaluate(() => {performance.mark('hydration-start')});
+
+      const activationResult = await page.evaluate(() => {
+        return new Promise((resolve) => {
+          const checkActivation = () => {
+            const measures = performance.getEntriesByType('measure');
+            const activate = measures.find(m => m.name === 'activate');
+            if (activate) {
+              resolve({
+                activationTime: activate?.duration,
+                measures: measures.filter(m => m.name !== 'activate').map(m => ({
+                  name: m.name,
+                  duration: m.duration
+                }))
+              });
+            } else {
+              setTimeout(checkActivation, 5);
+            }
+          };
+          checkActivation();
+        });
       });
-    });
 
-    const hydrationTime = await page.evaluate(() => {
-      const marks = performance.getEntriesByType('mark');
-      const hydrationStart = marks.find(m => m.name === 'hydration-start')?.startTime;
-      const hydrationEnd = marks.find(m => m.name === 'activate-start')?.startTime;
-      return Math.max(hydrationEnd - hydrationStart, 0); // Negative means no hydration necessary
-    });
-    
-    await page.tracing.stop();
-    const screenshot = await page.screenshot({ encoding: 'base64' });
-    await page.close();
+      const hydrationTime = await page.evaluate(() => {
+        const marks = performance.getEntriesByType('mark');
+        const hydrationStart = marks.find(m => m.name === 'hydration-start')?.startTime;
+        const hydrationEnd = marks.find(m => m.name === 'activate-start')?.startTime;
+        return Math.max(hydrationEnd - hydrationStart, 0);
+      });
+      
+      await page.tracing.stop();
+      await page.close();
 
+      results.push({
+        runNumber: run + 1,
+        tracePath,
+        publishTime,
+        networkTime,
+        loadTime,
+        activationTime: activationResult.activationTime,
+        activations: activationResult.measures,
+        hydrationTime,
+        packageSize,
+      });
+    }
+
+    // Use the screenshot from the last run for display
     res.json({
       success: true,
-      tracePath,
-      timing: {
-        publishTime, 
-        networkTime,
-        loadTime, 
-        activationTime,
-        hydrationTime
-      },
-      screenshot: `data:image/png;base64,${screenshot}`
+      results,
     });
   } catch (error) {
     console.error('Publishing error:', error);

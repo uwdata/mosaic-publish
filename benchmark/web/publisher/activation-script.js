@@ -7,14 +7,12 @@ function clientsReady() {
 }
 
 async function activateInteractorsAndInputs(interactors, inputs) {
-    performance.mark('activate-start');
-
     for (const interactor of interactors) {
       performance.mark('activation-start');
       interactor.activate();
       await waitForQueryToFinish();
       performance.mark('activation-end');
-      performance.measure('interactor-activation', 'activation-start', 'activation-end');
+      performance.measure(`interactor-activation-${interactor.constructor.name}`, 'activation-start', 'activation-end');
     }
 
     for (const input of inputs) {
@@ -22,11 +20,8 @@ async function activateInteractorsAndInputs(interactors, inputs) {
       input.activate();
       await waitForQueryToFinish();
       performance.mark('activation-end');
-      performance.measure('input-activation', 'activation-start', 'activation-end');
+      performance.measure(`input-activation-${input.constructor.name}`, 'activation-start', 'activation-end');
     }
-
-    performance.mark('activate-end');
-    performance.measure('activate', 'activate-start', 'activate-end');
   }
 
 async function waitForQueryToFinish() {
@@ -55,7 +50,13 @@ function processClients() {
 }
 
 clientsReady()
-    .then(() => {
+    .then(async () => {
         const { interactors, inputs } = processClients();
-        activateInteractorsAndInputs(interactors, inputs)
+        // performance.mark('hydration-start');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await waitForQueryToFinish();
+        performance.mark('activate-start');
+        await activateInteractorsAndInputs(interactors, inputs)
+        performance.mark('activate-end');
+        performance.measure('activate', 'activate-start', 'activate-end');
     })

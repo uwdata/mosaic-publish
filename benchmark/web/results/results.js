@@ -11,41 +11,69 @@ export default async function(el) {
       DROP TABLE IF EXISTS publisher;
       DROP TABLE IF EXISTS pub_metrics;
       DROP TABLE IF EXISTS pub_breakdown;
+      DROP TABLE IF EXISTS pub_mean;
+      DROP TABLE IF EXISTS pub_baseline;
+      DROP TABLE IF EXISTS pub_pct;
       
       CREATE TABLE ${table} AS SELECT * FROM '${location.origin}/results/results.parquet';
       CREATE TABLE update AS SELECT * FROM ${table} WHERE stage = 'update';
       CREATE TABLE build AS SELECT * FROM ${table} WHERE stage = 'create';
-      CREATE TABLE publisher AS SELECT * FROM '${location.origin}/results/publisher-benchmark-results.json';
+      CREATE TABLE publisher_raw AS SELECT * FROM read_json_auto('${location.origin}/results/publisher-benchmark-results.json');
       
-      -- pub_metrics: add numeric size, TTR, TTA
-      CREATE TABLE pub_metrics AS
-        SELECT *,
-          CAST(REPLACE(dataSize, 'E', 'e') AS DOUBLE) AS size,
+      CREATE VIEW pub_metrics AS
+        SELECT
+          spec,
+          optimization,
+          CAST(REPLACE(dataSize,'E','e') AS DOUBLE) AS size,
+          runNumber,
+          networkTime,
+          loadTime,
+          hydrationTime,
+          activationTime,
           networkTime + loadTime AS TTR,
-          networkTime + loadTime + hydrationTime + activationTime AS TTA
-        FROM publisher;
+          networkTime + loadTime + hydrationTime + activationTime AS TTA,
+          packageSize / 1e6 AS MB
+        FROM publisher_raw;
+
+      CREATE VIEW pub_metrics_1e7 AS
+        SELECT * FROM pub_metrics WHERE size = 1e7;
       
-      -- pub_breakdown: long format for stacking
-      CREATE TABLE pub_breakdown AS
-        SELECT spec, optimization, size, 'Network' AS component, networkTime AS value FROM pub_metrics
-        UNION ALL
-        SELECT spec, optimization, size, 'Render' AS component, loadTime AS value FROM pub_metrics
-        UNION ALL
-        SELECT spec, optimization, size, 'Activate' AS component, activationTime + hydrationTime AS value FROM pub_metrics;
+      CREATE TABLE pub_mean AS
+        SELECT
+          spec,
+          size,
+          optimization,
+          AVG(TTR) AS TTR,
+          AVG(TTA) AS TTA,
+          STDDEV(TTR) AS sdTTR,
+          STDDEV(TTA) AS sdTTA
+        FROM pub_metrics
+        GROUP BY spec, size, optimization;
       
-      -- For cost-benefit: baseline TTR for each spec/size
-      DROP TABLE IF EXISTS pub_baseline;
       CREATE TABLE pub_baseline AS
-        SELECT spec, size, TTR AS baseline_TTR, TTA AS baseline_TTA FROM pub_metrics WHERE optimization = 'none';
+        SELECT m.spec, m.size, m.optimization, m.TTR, m.TTA
+        FROM pub_mean m
+        WHERE m.optimization = 'none';
       
-      DROP TABLE IF EXISTS pub_costbenefit;
-      CREATE TABLE pub_costbenefit AS
-        SELECT m.*, b.baseline_TTR, b.baseline_TTA,
-          b.baseline_TTR - m.TTR AS TTR_saving,
-          b.baseline_TTA - m.TTA AS TTA_saving
-        FROM pub_metrics m
-        LEFT JOIN pub_baseline b
-        ON m.spec = b.spec AND m.size = b.size;
+      CREATE TABLE pub_pct AS
+        SELECT
+          m.spec,
+          m.size,
+          m.optimization,
+          100 * (b.TTR - m.TTR) / b.TTR AS pct_gain_TTR,
+          100 * (b.TTA - m.TTA) / b.TTA AS pct_gain_TTA
+        FROM pub_mean m
+        JOIN pub_baseline b ON m.spec = b.spec AND m.size = b.size
+        WHERE m.optimization != 'none';
+      
+      CREATE TABLE pub_breakdown AS
+        SELECT optimization, 'network' AS part, AVG(networkTime) AS ms FROM pub_metrics WHERE spec='airlines' AND size=1e7 GROUP BY optimization
+        UNION ALL
+        SELECT optimization, 'load',     AVG(loadTime)     FROM pub_metrics WHERE spec='airlines' AND size=1e7 GROUP BY optimization
+        UNION ALL
+        SELECT optimization, 'hydration',AVG(hydrationTime) FROM pub_metrics WHERE spec='airlines' AND size=1e7 GROUP BY optimization
+        UNION ALL
+        SELECT optimization, 'activation',AVG(activationTime) FROM pub_metrics WHERE spec='airlines' AND size=1e7 GROUP BY optimization;
     `);
   } catch (error) {
     console.error('Error loading data:', error);
@@ -77,14 +105,6 @@ export default async function(el) {
     unopt: 'Unoptimized Mosaic Local',
     VegaPlus: 'VegaPlus',
     vegaFusion: 'VegaFusion'
-  };
-
-  const optimizationOrder = ['none', 'minimal', 'more', 'most'];
-  const componentColorDomain = ['Network', 'Render', 'Activate'];
-  const componentColorLabels = {
-    Network: 'Network',
-    Render: 'Render',
-    Activate: 'Activate'
   };
 
   function plot(name, title, threshold, minFps) {
@@ -140,230 +160,207 @@ export default async function(el) {
     );
   }
 
-  function plotTTRScaling() {
+  // --- Publisher Benchmark Visualizations ---
+  const publisherSpecs = [
+    { fx: 'airlines', text: 'Airlines' },
+    { fx: 'property', text: 'Property' },
+    { fx: 'flights', text: 'Flights' },
+    { fx: 'gaia', text: 'Gaia' },
+    { fx: 'taxis', text: 'Taxis' }
+  ];
+  const publisherOptOrder = ['none', 'minimal', 'more', 'most'];
+  const publisherColorDomain = publisherOptOrder;
+  const publisherColorLabels = {
+    none: 'No Optimization',
+    minimal: 'Minimal',
+    more: 'More',
+    most: 'Most'
+  };
+  const breakdownParts = [
+    { part: 'network', text: 'Network' },
+    { part: 'load', text: 'Render' },
+    { part: 'hydration', text: 'Hydration' },
+    { part: 'activation', text: 'Activation' }
+  ];
+
+  function plotTTRvsVolume() {
     return vg.plot(
-      vg.name('TTR-scaling'),
+      vg.name('pub_mean_TTR'),
       vg.frame(),
-      vg.lineY(vg.from('pub_metrics'), {
+      vg.text(publisherSpecs, { fx: 'fx', text: 'text', frameAnchor: 'top', dy: 5 }),
+      vg.areaY(vg.from('pub_metrics', { optimize: false }), {
         fx: 'spec',
         x: 'size',
-        y: 'TTR',
-        stroke: 'optimization',
-        curve: 'monotone-x',
-        strokeWidth: 2
-      }),
-      vg.dot(vg.from('pub_metrics'), {
-        fx: 'spec',
-        x: 'size',
-        y: 'TTR',
+        y1: vg.quantile('TTR', 0.25),
+        y2: vg.quantile('TTR', 0.75),
         fill: 'optimization',
-        r: 2.5
+        fillOpacity: 0.15,
+        curve: 'monotone-x'
       }),
-      vg.fxLabel('Latencies of Visualization Specifications'),
-      vg.fxDomain(labels.map(l => l.fx)), // TODO: why does this not work?
-      vg.fxTickPadding(-12),
+      vg.lineY(vg.from('pub_metrics', { optimize: false }), {
+        fx: 'spec',
+        x: 'size',
+        y: vg.median('TTR'),
+        stroke: 'optimization',
+        curve: 'monotone-x'
+      }),
+      vg.fxDomain(publisherSpecs.map(l => l.fx)),
+      vg.fxLabel('Latency Across Visualization Specifications and Data Volumes'),
+      vg.fxTickFormat(() => ''),
       vg.fxPadding(0.1),
       vg.xScale('log'),
-      vg.xDomain([1e4, 1e7]),
-      vg.xTicks(4),
       vg.xInset(5),
+      vg.xTicks(4),
       vg.xTickFormat(tickFormat),
       vg.xLabel(null),
-      // vg.yScale('sqrt'),
-      vg.yLabel('Time to Render (ms)'),
+      vg.yScale('log'),
+      vg.yLabel('TTR (ms)'),
       vg.yLabelAnchor('center'),
-      vg.yTicks(5),
-      vg.yTickFormat(tickFormat),
-      vg.yGrid(true),
-      vg.yDomain([500, 8e3]),
-      vg.colorDomain(optimizationOrder),
-      vg.width(900),
-      vg.height(160),
-      vg.marginTop(18),
-      vg.marginLeft(45),
-    );
-  }
-
-  function plotTTAScaling() {
-    return vg.plot(
-      vg.name('TTA-scaling'),
-      vg.frame(),
-      vg.lineY(vg.from('pub_metrics'), {
-        fx: 'spec',
-        x: 'size',
-        y: 'TTA',
-        stroke: 'optimization',
-        curve: 'monotone-x',
-        strokeWidth: 2
-      }),
-      vg.dot(vg.from('pub_metrics'), {
-        fx: 'spec',
-        x: 'size',
-        y: 'TTA',
-        fill: 'optimization',
-        r: 2.5
-      }),
-      vg.fxDomain(labels.map(l => l.fx)),
-      vg.fxLabel(''),
-      vg.fxTickPadding(-12),
-      vg.fxPadding(0.1),
-      vg.xScale('log'),
-      vg.xDomain([1e4, 1e7]),
-      vg.xTicks(4),
-      vg.xInset(5),
-      vg.xTickFormat(tickFormat),
-      vg.xLabel('Data Size (Rows)'),
-      // vg.yScale('sqrt'),
-      vg.yLabel('Time to Activate (ms)'),
-      vg.yLabelAnchor('center'),
-      vg.yTicks(5),
-      vg.yTickFormat(tickFormat),
-      vg.yGrid(true),
       vg.yDomain([500, 1e4]),
-      vg.colorDomain(optimizationOrder),
+      vg.yTicks(8),
+      vg.yTickFormat(tickFormat),
+      vg.colorDomain(publisherColorDomain),
+      vg.colorTickFormat(v => publisherColorLabels[v]),
       vg.width(900),
       vg.height(160),
-      vg.marginLeft(45),
-      vg.marginTop(18),
-      vg.marginBottom(32)
-    );
-  }
-
-  function plotTTRAllSpecs() {
-    return vg.plot(
-      vg.name('TTR-all-specs'),
-      vg.frame(),
-      vg.lineY(vg.from('pub_metrics'), {
-        x: 'size',
-        y: vg.avg('TTR'),
-        stroke: 'optimization',
-        curve: 'monotone-x',
-        strokeWidth: 2
-      }),
-      vg.xScale('log'),
-      vg.xDomain([1e4, 1e7]),
-      vg.xTicks(4),
-      vg.xInset(5),
-      vg.xTickFormat(tickFormat),
-      vg.xLabel('Data Size (Rows)'),
-      vg.yScale('log'),
-      vg.yLabel('Time to Render (ms)'),
-      vg.yLabelAnchor('center'),
-      vg.yTicks(5),
-      vg.yTickFormat(tickFormat),
-      vg.yGrid(true),
-      vg.yDomain([500, 4e3]),
-      vg.colorDomain(optimizationOrder),
-      vg.width(450),
-      vg.height(450),
-      vg.marginTop(18),
-      vg.marginLeft(45),
-      vg.marginBottom(32)
-    );
-  }
-
-  function plotTTAAllSpecs() {
-    return vg.plot(
-      vg.name('TTA-all-specs'),
-      vg.frame(),
-      vg.lineY(vg.from('pub_metrics'), {
-        x: 'size',
-        y: vg.avg('TTA'),
-        stroke: 'optimization',
-        curve: 'monotone-x',
-        strokeWidth: 2
-      }),
-      vg.xScale('log'),
-      vg.xDomain([1e4, 1e7]),
-      vg.xTicks(4),
-      vg.xInset(5),
-      vg.xTickFormat(tickFormat),
-      vg.xLabel('Data Size (Rows)'),
-      vg.yScale('log'),
-      vg.yLabel('Time to Activate (ms)'),
-      vg.yLabelAnchor('center'),
-      vg.yTicks(5),
-      vg.yTickFormat(tickFormat),
-      vg.yGrid(true),
-      vg.yDomain([1000, 6e3]),
-      vg.colorDomain(optimizationOrder),
-      vg.width(450),
-      vg.height(450),
-      vg.marginTop(18),
-      vg.marginLeft(45),
-      vg.marginBottom(32)
-    );
-  }
-
-  function plotComponentBreakdown() {
-    return vg.plot(
-      vg.name('component-breakdown'),
-      vg.frame(),
-      vg.barY(vg.from('pub_breakdown', { filter: 'size == 1e7' }), {
-        fx: 'spec',
-        x: 'optimization',
-        y: 'value',
-        fill: 'component',
-        fillOpacity: 0.85,
-        stack: true,
-        width: 28
-      }),
-      vg.fxLabel('Latency Component Breakdown at 1e7 Rows'),
-      vg.fxDomain(labels.map(l => l.fx)),
-      vg.fxTickPadding(-12),
-      vg.fxPadding(0.1),
-      vg.xLabel(null),
-      vg.xDomain(optimizationOrder),
-      vg.yLabel('Latency (ms)'),
-      vg.yLabelAnchor('center'),
-      vg.yTicks(5),
-      vg.yTickFormat(tickFormat),
-      vg.yDomain([0, 1.5e4]),
-      vg.colorDomain(componentColorDomain),
-      vg.colorTickFormat(v => componentColorLabels[v]),
-      vg.width(900),
-      vg.height(180),
       vg.marginTop(18),
       vg.marginLeft(45),
       vg.marginBottom(20)
     );
   }
 
-  function plotCostBenefitScatter() {
+  function plotTTAvsVolume() {
     return vg.plot(
-      vg.name('cost-benefit'),
+      vg.name('pub_mean_TTA'),
       vg.frame(),
-      vg.dot(vg.from('pub_costbenefit'), {
-        x: vg.median('TTR_saving'),
-        y: vg.median('TTA_saving'),
-        fill: 'optimization',
-        symbol: 'size',
+      vg.text(publisherSpecs, { fx: 'fx', text: 'text', frameAnchor: 'top', dy: 5 }),
+      vg.areaY(vg.from('pub_metrics', { optimize: false }), {
         fx: 'spec',
-        r: 5,
+        x: 'size',
+        y1: vg.quantile('TTA', 0.25),
+        y2: vg.quantile('TTA', 0.75),
+        fill: 'optimization',
+        fillOpacity: 0.15,
+        curve: 'monotone-x'
       }),
+      vg.lineY(vg.from('pub_metrics', { optimize: false }), {
+        fx: 'spec',
+        x: 'size',
+        y: vg.median('TTA'),
+        stroke: 'optimization',
+        curve: 'monotone-x'
+      }),
+      vg.fxDomain(publisherSpecs.map(l => l.fx)),
       vg.fxLabel(null),
-      vg.ruleY([0], { stroke: '#aaa', strokeDasharray: '4,4', strokeWidth: 1.5 }),
-      vg.ruleX([0], { stroke: '#aaa', strokeDasharray: '4,4', strokeWidth: 1.5 }),
-      vg.xScale('symlog'),
-      vg.xLabel('TTR Saving (ms)'),
-      vg.xDomain([-1e4, 1e4]),
-      vg.xTicks([-1e4, -1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3, 1e4]),
+      vg.fxTickFormat(() => ''),
+      vg.fxPadding(0.1),
+      vg.xScale('log'),
+      vg.xInset(5),
+      vg.xTicks(4),
       vg.xTickFormat(tickFormat),
-      vg.yLabel('TTA Saving (ms)'),
+      // vg.xLabel('Data Volume (rows)'),
+      vg.xLabel(null),
+      vg.xLabelOffset(30),
+      vg.yScale('log'),
+      vg.yLabel('TTA (ms)'),
       vg.yLabelAnchor('center'),
-      vg.yTicks([-1e4, -1e3, -1e2, -1e1, 0, 1e1, 1e2, 1e3, 1e4]),
+      vg.yDomain([500, 1e4]),
+      vg.yTicks(8),
       vg.yTickFormat(tickFormat),
-      vg.yDomain([-1e4, 1e4]),
-      vg.yScale('symlog'),
-      vg.colorDomain(optimizationOrder),
+      vg.colorDomain(publisherColorDomain),
+      vg.colorTickFormat(v => publisherColorLabels[v]),
       vg.width(900),
-      vg.height(220),
-      vg.marginTop(18),
+      vg.height(180),
+      vg.marginTop(5),
       vg.marginLeft(45),
-      vg.marginBottom(32)
+      // vg.marginBottom(40)
     );
   }
 
+  function plotBreakdown() {
+    return vg.plot(
+      vg.name('pub_breakdown'),
+      vg.frame(),
+      vg.barY(vg.from('pub_breakdown', { optimize: false }), {
+        x: 'optimization',
+        y: 'ms',
+        fill: 'part',
+      }),
+      vg.xLabel('Optimization Level'),
+      vg.xLabelOffset(30),
+      vg.xDomain(publisherOptOrder),
+      vg.yLabel('Average Latency (ms)'),
+      vg.yLabelAnchor('center'),
+      vg.yDomain([0, 4e3]),
+      vg.yTickFormat(tickFormat),
+      vg.colorDomain(breakdownParts.map(p => p.part)),
+      vg.colorTickFormat(v => breakdownParts.find(p => p.part === v)?.text || v),
+      vg.width(450),
+      vg.height(450),
+      vg.marginTop(18),
+      vg.marginLeft(45),
+      vg.marginBottom(45)
+    );
+  }
+
+  function plotPackageSize() {
+    return vg.plot(
+      vg.name('pub_metrics_1e7'),
+      vg.frame(),
+      vg.barY(vg.from('pub_metrics_1e7', { optimize: false }), {
+        x: 'optimization',
+        y: vg.median('MB'),
+        fill: 'spec',
+      }),
+      vg.xLabel('Optimization Level'),
+      vg.yLabel('Storage Cost (MB)'),
+      vg.yLabelAnchor('center'),
+      vg.yDomain([0, 1e3]),
+      vg.yTickFormat(tickFormat),
+      vg.xDomain(publisherOptOrder),
+      vg.width(450),
+      vg.height(450),
+      vg.marginTop(18),
+      vg.marginLeft(45),
+      vg.marginBottom(45)
+    );
+  }
+
+  // --- Compose all publisher plots ---
+  const publisherView = vg.vconcat(
+    vg.vconcat(
+      plotTTRvsVolume(),
+      // vg.hconcat(
+      //   vg.hspace(100),
+      //   vg.colorLegend({ for: 'pub_mean_TTR' })
+      // ),
+      vg.vspace(10),
+      plotTTAvsVolume(),
+      vg.hconcat(
+        vg.hspace(40),
+        vg.colorLegend({ for: 'pub_mean_TTA' })
+      )
+    ),
+    vg.vspace(10),
+    vg.hconcat(
+    vg.vconcat(
+      plotBreakdown(),
+      vg.hconcat(
+        vg.hspace(100),
+        vg.colorLegend({ for: 'pub_breakdown'}),
+      )
+    ),
+    vg.vconcat(
+      plotPackageSize(),
+      vg.hconcat(
+        vg.hspace(100),
+          vg.colorLegend({ for: 'pub_metrics_1e7'}),
+        )
+      )
+    )
+  );
+
+  // --- Compose all plots ---
   const view = vg.vconcat(
     plot('build', 'Materialized View Creation', 1000),
     vg.vspace(10),
@@ -373,42 +370,7 @@ export default async function(el) {
       vg.colorLegend({ for: 'update' })
     ),
     vg.vspace(30),
-    vg.vconcat(
-      plotTTRScaling(),
-      plotTTAScaling(),
-      vg.hconcat(
-        vg.hspace(45),
-        vg.colorLegend({ for: 'TTA-scaling' })
-      )
-    ),
-    vg.vspace(20),
-    vg.vconcat(
-      plotComponentBreakdown(),
-      vg.hconcat(
-        vg.hspace(45),
-        vg.colorLegend({ for: 'component-breakdown' })
-      )
-    ),
-    vg.vspace(20),
-    vg.vconcat(
-      plotCostBenefitScatter(),
-      vg.hconcat(
-        vg.hspace(45),
-        vg.colorLegend({ for: 'cost-benefit' }),
-        vg.symbolLegend({ for: 'cost-benefit' }),
-      )
-    ),
-    vg.vspace(10),
-    vg.vconcat(
-      vg.hconcat(
-        plotTTRAllSpecs(),
-        plotTTAAllSpecs(),
-      ),
-      vg.hconcat(
-        vg.hspace(45),
-        vg.colorLegend({ for: 'TTA-all-specs' })
-      ),
-    )
+    publisherView
   );
 
   el.replaceChildren(view);

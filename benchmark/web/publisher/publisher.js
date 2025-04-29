@@ -36,6 +36,7 @@ async function runBenchmark(specName, optimization, dataSize, updateUI = true) {
   
   // Update LIMIT/limit in the YAML
   spec = updateSpecLimit(spec, dataSize);
+  
   // Create results table row
   let resultRow;
   if (updateUI) {
@@ -50,15 +51,12 @@ async function runBenchmark(specName, optimization, dataSize, updateUI = true) {
       <td>Measuring...</td>
       <td>Measuring...</td>
       <td>Measuring...</td>
+      <td>Measuring...</td>
     `;
     resultsBody.appendChild(resultRow);
   }
   
   try {
-    // Clear preview area
-    const previewEl = document.getElementById('preview');
-    previewEl.innerHTML = `<div class="loading">Running benchmark for ${specName} with ${optimization} optimization, data size ${dataSize}...</div>`;
-    
     // Call the server endpoint to handle publishing and timing
     const response = await fetch('http://localhost:3001/publish', {
       method: 'POST',
@@ -82,46 +80,52 @@ async function runBenchmark(specName, optimization, dataSize, updateUI = true) {
       throw new Error(result.error);
     }
     
-    // Create result object
-    const benchmarkResult = {
-      spec: specName,
-      optimization,
-      dataSize,
-      publishTime: result.timing.publishTime,
-      networkTime: result.timing.networkTime,
-      loadTime: result.timing.loadTime,
-      hydrationTime: result.timing.hydrationTime,
-      activationTime: result.timing.activationTime,
-    };
+    // Process all runs
+    result.results.forEach((run) => {
+      // Create result object for each run with flattened structure
+      const benchmarkResult = {
+        spec: specName,
+        optimization,
+        dataSize,
+        runNumber: run.runNumber,
+        publishTime: run.publishTime,
+        networkTime: run.networkTime,
+        loadTime: run.loadTime,
+        hydrationTime: run.hydrationTime,
+        activationTime: run.activationTime,
+        activations: run.activations,
+        packageSize: run.packageSize
+      };
+      
+      // Add to results array
+      benchmarkResults.push(benchmarkResult);
+    });
     
-    // Add to results array
-    benchmarkResults.push(benchmarkResult);
-    
-    // Update UI
+    // Update UI with average values
     if (updateUI && resultRow) {
+      const avgResults = {
+        publishTime: result.results.reduce((acc, r) => acc + r.publishTime, 0) / result.results.length,
+        networkTime: result.results.reduce((acc, r) => acc + r.networkTime, 0) / result.results.length,
+        loadTime: result.results.reduce((acc, r) => acc + r.loadTime, 0) / result.results.length,
+        hydrationTime: result.results.reduce((acc, r) => acc + r.hydrationTime, 0) / result.results.length,
+        activationTime: result.results.reduce((acc, r) => acc + r.activationTime, 0) / result.results.length,
+        packageSize: result.results.reduce((acc, r) => acc + r.packageSize, 0) / result.results.length
+      };
+
       resultRow.innerHTML = `
         <td>${specName}</td>
         <td>${optimization}</td>
         <td>${dataSize}</td>
-        <td>${Math.round(result.timing.publishTime)}</td>
-        <td>${Math.round(result.timing.networkTime)}</td>
-        <td>${Math.round(result.timing.loadTime)}</td>
-        <td>${Math.round(result.timing.hydrationTime)}</td>
-        <td>${Math.round(result.timing.activationTime)}</td>
+        <td>${Math.round(avgResults.publishTime)}</td>
+        <td>${Math.round(avgResults.networkTime)}</td>
+        <td>${Math.round(avgResults.loadTime)}</td>
+        <td>${Math.round(avgResults.hydrationTime)}</td>
+        <td>${Math.round(avgResults.activationTime)}</td>
+        <td>${(avgResults.packageSize / 1024 / 1024).toFixed(2)} MB</td>
       `;
     }
     
-    // Update preview with the visualization
-    previewEl.innerHTML = `
-      <div style="padding: 20px; background: #f5f5f5; border: 1px solid #ddd;">
-        <h3>${specName} Visualization (${optimization} optimization, data size ${dataSize})</h3>
-        <div class="visualization" style="margin: 20px 0;">
-          <img src="${result.screenshot}" alt="Visualization" style="max-width: 100%; border: 1px solid #ccc;">
-        </div>
-      </div>
-    `;
-    
-    return benchmarkResult;
+    return benchmarkResults;
   } catch (error) {
     console.error(`Error running benchmark: ${error}`);
     if (updateUI && resultRow) {
@@ -129,7 +133,7 @@ async function runBenchmark(specName, optimization, dataSize, updateUI = true) {
         <td>${specName}</td>
         <td>${optimization}</td>
         <td>${dataSize}</td>
-        <td colspan="4" class="error">Error: ${error.message}</td>
+        <td colspan="6" class="error">Error: ${error.message}</td>
       `;
     }
     return null;
