@@ -1,7 +1,15 @@
+export const jsTemplate = (postLoad?: string) => `<script type="module">
+import {default as visualization, clientsReady, getVgInstance} from './index.js';
+
+clientsReady().then(() => {
+  document.querySelector('.mosaic')?.replaceChildren(visualization);
+})${postLoad ? `.then(() => {${postLoad}});` : ';'}
+</script>`;
+
 export type HTMLTemplateOptions = {
   title: string;
   isInteractive: boolean;
-  needsClientReady: boolean;
+  postLoad?: string;
   customScript?: string;
   element?: HTMLElement | SVGElement;
   css?: string;
@@ -14,27 +22,17 @@ export const htmlTemplate = (options: HTMLTemplateOptions) => `
 </head>
 <body>
   <article class="mosaic">
-    ${options.isInteractive ? '<div class="ssr"></div>' : ''}
+    ${options.isInteractive && options.element ? '<div class="ssr"></div>' : ''}
     ${options.element?.outerHTML ?? ''}
   </article>
 </body>
-${options.isInteractive ? `
-<script type="module">
-${options.needsClientReady ?
-      `  import {default as visualization, clientsReady} from './index.js';
-
-  clientsReady().then(() => {
-    document.querySelector('.mosaic')?.replaceChildren(visualization);
-  });` :
-      `  import {default as visualization} from './index.js';
-
-  document.querySelector('.mosaic')?.replaceChildren(visualization);`}
-</script>` : ''}
+${options.isInteractive ? jsTemplate(options.postLoad) : ''}
 
 ${options.customScript ? `
 <script type="module">
 ${options.customScript}
 </script>` : ''}
+
 ${options.css}
 </html>`;
 
@@ -183,25 +181,22 @@ export const templateCSS = `<style>
 export const VGPLOT = '@uwdata/vgplot';
 export const FLECHETTE = '@uwdata/flechette';
 
-// TODO: switch this to ./renderHelpers version when changes pushed to npm
-// Currently, this is hack to see when clients are ready use .pending when it is available
-const clientsReady = `export function clientsReady() {
-  const clients = [...vg.coordinator().clients];
-  return Promise.allSettled(clients.map(c => c.initialize()))
-}`
-
 const loadCache = (cacheFile: string) => `
 const cacheBytes = await fetch(window.location.origin + "/${cacheFile}").then(res => res.arrayBuffer());
 vg.coordinator().manager.cache().import(tableFromIPC(cacheBytes).get(0).cache);`;
 
-export type PreambleOptions = { needsClientReady: boolean, cacheFile?: string };
+export type PreambleOptions = { cacheFile?: string };
 export const preamble = (options: PreambleOptions) => {
   return `
 export function getVgInstance() {
   return vg;
 }
 
-${options.needsClientReady ? clientsReady : ''}
+export function clientsReady() {
+  const clients = [...vg.coordinator().clients];
+  return Promise.allSettled(clients.map(c => c._pending))
+}
+
 ${options.cacheFile ? loadCache(options.cacheFile) : ''}
 `
 }

@@ -138,6 +138,7 @@ export class MosaicPublisher {
       fs.mkdirSync(this.outputPath, { recursive: true });
     }
 
+    let postLoad;
     if (isInteractive) {
       // Activate interactors and inputs
       await this.activateInteractorsAndInputs(interactors, inputs);
@@ -150,15 +151,15 @@ export class MosaicPublisher {
         return code?.replace(`"${file}"`, `window.location.origin + "/${file}"`);
       };
       const tables = this.ctx.coordinator.databaseConnector().tables();
-      await this.updateDataNodes(tables);
-
+      postLoad = await this.updateDataNodes(tables);
       // Export relevant data from DuckDB to Parquet
       await this.exportDataFromDuckDB(tables);
     }
 
     await this.writeFiles(
       isInteractive,
-      this.optimizations.includes(Optimizations.PRERENDER) ? element : undefined
+      this.optimizations.includes(Optimizations.PRERENDER) ? element : undefined,
+      postLoad,
     );
   }
 
@@ -207,7 +208,7 @@ export class MosaicPublisher {
    * Process data definitions (DataNodes) and converts them to ParquetDataNode
    * objects based on specified tables.
    */
-  private async updateDataNodes(tables: Record<string, Set<string> | null>) {
+  private async updateDataNodes(tables: Record<string, Set<string> | null>): Promise<string | undefined> {
     // process data definitions
     for (const node of Object.values(this.data!)) {
       if (!(node.name in tables)) {
@@ -223,28 +224,33 @@ export class MosaicPublisher {
     const db_tables = await this.ctx.coordinator.query('SHOW ALL TABLES', { cache: false, type: 'json' });
     if (this.optimizations.includes(Optimizations.PREAGREGATE)
       && db_tables.some((table: any) => table.name.startsWith('preagg_'))) {
-      this.ast!.data['schema'] = new SchemaCreateNode('schema', 'mosaic');
+      let postLoad = "getVgInstance().coordinator().exec([\n\t'CREATE SCHEMA IF NOT EXISTS mosaic;',\n";
+      const genCtx = new CodegenContext({
+        namespace: 'getVgInstance()'
+      });
+
       for (const table of db_tables) {
         if (table.name.startsWith('preagg_')) {
           const name = `${table.schema}.${table.name}`;
           tables[name] = null;
           const file = `data/.mosaic/${table.name}.parquet`;
           this.ast!.data[name] = new ParquetDataNode(name, file, new OptionsNode({}));
+          postLoad += `\t${this.ast!.data[name].codegenQuery(genCtx)},\n`;
         } else if (table.name in tables && tables[table.name] == new Set(table.column_names)) {
           tables[table.name] = null;
         }
       }
+      postLoad += "], {priority: 2})";
+      return postLoad;
     }
+    return undefined;
   }
 
   /**
    * Write out the index.js, index.html, and create data/ directory as needed.
    */
-  private async writeFiles(isInteractive: boolean, element?: HTMLElement | SVGElement) {
-    let preambleOptions: PreambleOptions = {
-      needsClientReady: this.optimizations.includes(Optimizations.PRERENDER),
-      cacheFile: undefined,
-    }
+  private async writeFiles(isInteractive: boolean, element?: HTMLElement | SVGElement, postLoad?: string) {
+    let preambleOptions: PreambleOptions = { cacheFile: undefined }
     if (this.optimizations.includes(Optimizations.LOAD_CACHE)) {
       const cache = this.ctx.coordinator.manager.cache().export();
       const cacheFile = '.cache.arrow';
@@ -267,8 +273,8 @@ export class MosaicPublisher {
     const html = htmlTemplate({
       title: this.title,
       css: templateCSS,
+      postLoad,
       isInteractive,
-      needsClientReady: this.optimizations.includes(Optimizations.PRERENDER),
       element,
       customScript: this.customScript,
     });
@@ -331,6 +337,7 @@ export class MosaicPublisher {
 
       if (table.startsWith('mosaic.preagg_')) {
         materialized_view_copy_queries.push(query);
+        delete this.ast!.data[table];
       } else {
         table_copy_queries.push(query);
       }
@@ -350,15 +357,13 @@ export class MosaicPublisher {
   }
 }
 
-class SchemaCreateNode extends QueryDataNode {
-  schema: string;
-
-  constructor(name: string, schema: string) {
-    super(name, "schema");
-    this.schema = schema;
-  }
-
-  public codegenQuery(ctx: CodegenContext) {
-    return `'CREATE SCHEMA IF NOT EXISTS ${this.schema};'`;
-  }
-}
+// then(() => {
+//     getVgInstance().coordinator().exec(['CREATE SCHEMA IF NOT EXISTS mosaic;'], {priority: 2}).then(() => {
+//       getVgInstance().coordinator().exec([
+//         getVgInstance().loadParquet("mosaic.preagg_6bbe25ef", window.location.origin + "/data/.mosaic/preagg_6bbe25ef.parquet"),
+//         getVgInstance().loadParquet("mosaic.preagg_6e8516e9", window.location.origin + "/data/.mosaic/preagg_6e8516e9.parquet"),
+//         getVgInstance().loadParquet("mosaic.preagg_758b378c", window.location.origin + "/data/.mosaic/preagg_758b378c.parquet"),
+//         getVgInstance().loadParquet("mosaic.preagg_e9243c45", window.location.origin + "/data/.mosaic/preagg_e9243c45.parquet")
+//       ], {priority: 2});
+//     })
+//   })
