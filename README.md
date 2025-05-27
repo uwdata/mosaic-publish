@@ -12,7 +12,7 @@ This tool is designed to be used via `npx` or can be installed globally.
 ### Run with `npx`
 
 ```bash
-npx @uwdata/publish --spec ./path/to/spec.json
+npx @uwdata/publish ./path/to/spec.yaml -o most
 ```
 
 ### Global Installation
@@ -26,7 +26,7 @@ npm install -g @uwdata/publish
 Now you can run the tool from anywhere:
 
 ```bash
-mosaic-publish --spec ./path/to/spec.json
+mosaic-publish ./path/to/spec.yaml -o most
 ```
 
 ## API Usage
@@ -35,11 +35,11 @@ The functionality of mosaic-publish can also be accessed programmatically via it
 
 ```js
 import { MosaicPublisher } from '@uwdata/publish';
+import fs from 'fs';
 
 const publisher = new MosaicPublisher({
-  spec: './path/to/spec.json',
-  outputDir: './docs/public/schema',
-  verbose: true
+  specContent: fs.readFileSync('./path/to/spec.yaml', 'utf8'),
+  outputPath: './path/to/output/directory'
 });
 
 publisher.publish()
