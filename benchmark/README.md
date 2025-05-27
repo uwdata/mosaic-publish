@@ -18,14 +18,25 @@ _Note: for review purposes, this repo includes all example datasets as 100k row 
 - Ensure you have node.js version 20 or higher installed.
 - Run `npm i` to install dependencies.
 
-### Benchmark Query Generation
+### Mosaic Publisher Benchmarks
+
+_For review purposes, this step can be skipped. Benchmark results are in the `results/` folder._
+
+The publisher benchmarks test the performance of the [Mosaic Publisher](https://github.com/uwdata/mosaic/tree/main/packages/publish).
+
+- Run `npm run dev` to start the development server.
+- In a separate terminal, run `npm run server` to start the backend server.
+- Navigate to the publisher endpoint on the website to access the publisher benchmarks interface.
+- Use the interface to test publishing performance with different datasets and configurations by changing the "Specification", "Optimization Level", and "Data Size" dropdowns.
+
+### Pre-Aggregated View Query Benchmark Generation
 
 _For review purposes, this step can be skipped. Benchmark queries are already in the `tasks/` folder._
 
-- Run `npm run dev` to launch visualization examples.
+- With the development server running (`npm run dev`), navigate to the "Query" endpoint.
 - Select a template using the "Specification" menu and click the `Run` button to load the example, simulate interactions, and generate benchmark queries. Resulting query logs will be downloaded as a JSON file. The "Optimize" checkbox controls whether or not pre-aggregated materialized views are created.
 
-### Run Benchmarks
+### Run Pre-Aggregated View Query Benchmarks
 
 _For review purposes, this step can also be skipped. Benchmark results are in the `results/` folder._
 
@@ -40,4 +51,4 @@ _For review purposes, this step can also be skipped. Benchmark results are in th
 ### Analyze Results
 
 - Upon completion of benchmarks, run the `prep/select/results.sql` script in DuckDB to consolidate all benchmark results. _You can safely skip this step if reviewing, `results/results.parquet` should already exist._
-- Run `npm run dev` and browse to `http://localhost:5173/web/results/` to see result visualization.
+- With the development server running (`npm run dev`), navigate to the "Results" endpoint.
