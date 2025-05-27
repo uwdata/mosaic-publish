@@ -171,10 +171,10 @@ export default async function(el) {
   const publisherOptOrder = ['none', 'minimal', 'more', 'most'];
   const publisherColorDomain = publisherOptOrder;
   const publisherColorLabels = {
-    none: 'No Optimization',
-    minimal: 'Minimal',
-    more: 'More',
-    most: 'Most'
+    none: 'None',
+    minimal: '+Prep',
+    more: '+Cache',
+    most: '+Prerender'
   };
   const breakdownParts = [
     { part: 'network', text: 'Network' },
@@ -205,7 +205,7 @@ export default async function(el) {
         curve: 'monotone-x'
       }),
       vg.fxDomain(publisherSpecs.map(l => l.fx)),
-      vg.fxLabel('Latency Across Visualization Specifications and Data Volumes'),
+      vg.fxLabel(null),
       vg.fxTickFormat(() => ''),
       vg.fxPadding(0.1),
       vg.xScale('log'),
@@ -216,14 +216,14 @@ export default async function(el) {
       vg.yScale('log'),
       vg.yLabel('TTR (ms)'),
       vg.yLabelAnchor('center'),
-      vg.yDomain([500, 1e4]),
-      vg.yTicks(8),
+      vg.yDomain([100, 5e3]),
+      vg.yTicks([100, 200, 400, 800, 1600, 3200]),
       vg.yTickFormat(tickFormat),
       vg.colorDomain(publisherColorDomain),
       vg.colorTickFormat(v => publisherColorLabels[v]),
       vg.width(900),
-      vg.height(160),
-      vg.marginTop(18),
+      vg.height(120),
+      vg.marginTop(8),
       vg.marginLeft(45),
       vg.marginBottom(20)
     );
@@ -264,15 +264,16 @@ export default async function(el) {
       vg.yScale('log'),
       vg.yLabel('TTA (ms)'),
       vg.yLabelAnchor('center'),
-      vg.yDomain([500, 1e4]),
-      vg.yTicks(8),
+      vg.yDomain([250, 1e4]),
+      vg.yTicks([250, 500, 1000, 2000, 4000, 8000]),
       vg.yTickFormat(tickFormat),
       vg.colorDomain(publisherColorDomain),
       vg.colorTickFormat(v => publisherColorLabels[v]),
       vg.width(900),
-      vg.height(180),
-      vg.marginTop(5),
+      vg.height(120),
+      vg.marginTop(8),
       vg.marginLeft(45),
+      vg.marginBottom(20)
       // vg.marginBottom(40)
     );
   }
@@ -281,81 +282,46 @@ export default async function(el) {
     return vg.plot(
       vg.name('pub_breakdown'),
       vg.frame(),
-      vg.barY(vg.from('pub_breakdown', { optimize: false }), {
-        x: 'optimization',
-        y: 'ms',
+      vg.barX(vg.from('pub_breakdown', { optimize: false }), {
+        y: 'optimization',
+        x: 'ms',
         fill: 'part',
       }),
-      vg.xLabel('Optimization Level'),
-      vg.xLabelOffset(30),
-      vg.xDomain(publisherOptOrder),
-      vg.yLabel('Average Latency (ms)'),
+      vg.yLabel('Optimization Level'),
       vg.yLabelAnchor('center'),
-      vg.yDomain([0, 4e3]),
-      vg.yTickFormat(tickFormat),
+      vg.yDomain(publisherOptOrder),
+      vg.yTickFormat(v => publisherColorLabels[v]),
+      vg.xLabel('Average Latency (ms)'),
+      vg.xDomain([0, 3e3]),
+      vg.xTickFormat(tickFormat),
+      vg.xInset(1),
       vg.colorDomain(breakdownParts.map(p => p.part)),
       vg.colorTickFormat(v => breakdownParts.find(p => p.part === v)?.text || v),
-      vg.width(450),
-      vg.height(450),
+      vg.width(500),
+      vg.height(200),
       vg.marginTop(18),
-      vg.marginLeft(45),
-      vg.marginBottom(45)
+      vg.marginLeft(75),
+      vg.marginBottom(35),
     );
   }
-
-  function plotPackageSize() {
-    return vg.plot(
-      vg.name('pub_metrics_1e7'),
-      vg.frame(),
-      vg.barY(vg.from('pub_metrics_1e7', { optimize: false }), {
-        x: 'optimization',
-        y: vg.median('MB'),
-        fill: 'spec',
-      }),
-      vg.xLabel('Optimization Level'),
-      vg.yLabel('Storage Cost (MB)'),
-      vg.yLabelAnchor('center'),
-      vg.yDomain([0, 1e3]),
-      vg.yTickFormat(tickFormat),
-      vg.xDomain(publisherOptOrder),
-      vg.width(450),
-      vg.height(450),
-      vg.marginTop(18),
-      vg.marginLeft(45),
-      vg.marginBottom(45)
-    );
-  }
-
+  
   // --- Compose all publisher plots ---
   const publisherView = vg.vconcat(
     vg.vconcat(
       plotTTRvsVolume(),
-      // vg.hconcat(
-      //   vg.hspace(100),
-      //   vg.colorLegend({ for: 'pub_mean_TTR' })
-      // ),
-      vg.vspace(10),
+      vg.vspace(5),
       plotTTAvsVolume(),
       vg.hconcat(
-        vg.hspace(40),
-        vg.colorLegend({ for: 'pub_mean_TTA' })
+        vg.hspace(25),
+        vg.colorLegend({ for: 'pub_mean_TTA', marginTop: 0 })
       )
     ),
-    vg.vspace(10),
-    vg.hconcat(
+    vg.vspace(30),
     vg.vconcat(
       plotBreakdown(),
       vg.hconcat(
-        vg.hspace(100),
-        vg.colorLegend({ for: 'pub_breakdown'}),
-      )
-    ),
-    vg.vconcat(
-      plotPackageSize(),
-      vg.hconcat(
-        vg.hspace(100),
-          vg.colorLegend({ for: 'pub_metrics_1e7'}),
-        )
+        vg.hspace(110),
+        vg.colorLegend({ for: 'pub_breakdown', columns: 1})
       )
     )
   );

@@ -29,6 +29,7 @@ vconcat:
       bandwidth: 0
     - select: intervalXY
       as: $filter
+      pixelSize: 2
     - mark: text
       data: [{ label: Taxi Pickups }]
       dx: 10
@@ -55,6 +56,7 @@ vconcat:
       bandwidth: 0
     - select: intervalXY
       as: $filter
+      pixelSize: 2
     - mark: text
       data: [{ label: Taxi Dropoffs }]
       dx: 10
@@ -82,6 +84,7 @@ vconcat:
     inset: 0.5
   - select: intervalX
     as: $filter
+    pixelSize: 2
   yTickFormat: s
   xLabel: Pickup Hour →
   width: 680
